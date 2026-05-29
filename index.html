@@ -1124,18 +1124,16 @@ document.getElementById("close-tutorial").addEventListener("click",()=>document.
 buildInventory();
 resizeCanvas();
 function sendGameResults(reportData) {
-  // لینک وبی که از گوگل اپس اسکریپت گرفتید را اینجا بگذارید
-  const url = "https://script.google.com/macros/s/AKfycbzK35COXyJVyNJJBBrKXLhWgwYt8ecZ45KcOXkWVUDD1UMGO_SldqlwjqIIsiGemPw1/exec"; 
+  const url = "https://script.google.com/macros/s/AKfycbyZ6PUE1jcgQWwgDbIL9_p94008UdG72xhtHFyaeZdupTJPcvUcM7w7bo5E1c_1ZXgx/exec"; 
 
-  // آماده‌سازی دقیق داده‌ها بر اساس خروجی بازی شما برای ارسال به گوگل شیت
+  // پکت داده‌ها کاملاً هماهنگ با متغیرهای بالا و ستون‌های گوگل شیت شما
   const payload = {
     session_id: reportData.session_id,
-    reinspectionTime: reportData.behavioral_metrics.reinspectionTime,
-    deliberationRatio: reportData.behavioral_metrics.deliberationRatio,
-    compulsiveScore: reportData.behavioral_metrics.perfectionismScore, // ارسال امتیاز با نام جدید
-    firstActionLatency: reportData.behavioral_metrics.firstActionLatency,
-    autoPilotRate: reportData.behavioral_metrics.autoPilotRate,
-    questionnaireTotal: reportData.questionnaire_scores.total
+    Reinspection_Time: reportData.behavioral_metrics.reinspection_time,
+    Deliberation_Ratio: reportData.behavioral_metrics.deliberation_ratio,
+    obsessive_Score: reportData.behavioral_metrics.perfectionism_score, // تبدیل امتیاز کمال‌گرایی به نام شیت شما
+    First_Action_Latency: reportData.behavioral_metrics.first_action_latency,
+    Auto_Pilot_Rate: reportData.behavioral_metrics.auto_pilot_rate
   };
 
   fetch(url, {
