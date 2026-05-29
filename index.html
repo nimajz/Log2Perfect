@@ -1108,6 +1108,7 @@ function showResults(){
     questionnaire_scores:{total:qtotal,items:questionnaireAnswers}
   };
   console.log("=== FULL REPORT ===",JSON.stringify(window._report,null,2));
+  sendGameResults(window._report);
 }
 document.getElementById("download-btn").addEventListener("click",()=>{
   if(!window._report) return;
@@ -1122,6 +1123,36 @@ document.getElementById("download-btn").addEventListener("click",()=>{
 document.getElementById("close-tutorial").addEventListener("click",()=>document.getElementById("tutorial").style.display="none");
 buildInventory();
 resizeCanvas();
+function sendGameResults(reportData) {
+  // لینک وبی که از گوگل اپس اسکریپت گرفتید را اینجا بگذارید
+  const url = "https://script.google.com/macros/s/AKfycbzK35COXyJVyNJJBBrKXLhWgwYt8ecZ45KcOXkWVUDD1UMGO_SldqlwjqIIsiGemPw1/exec"; 
+
+  // آماده‌سازی دقیق داده‌ها بر اساس خروجی بازی شما برای ارسال به گوگل شیت
+  const payload = {
+    session_id: reportData.session_id,
+    reinspectionTime: reportData.behavioral_metrics.reinspectionTime,
+    deliberationRatio: reportData.behavioral_metrics.deliberationRatio,
+    compulsiveScore: reportData.behavioral_metrics.perfectionismScore, // ارسال امتیاز با نام جدید
+    firstActionLatency: reportData.behavioral_metrics.firstActionLatency,
+    autoPilotRate: reportData.behavioral_metrics.autoPilotRate,
+    questionnaireTotal: reportData.questionnaire_scores.total
+  };
+
+  fetch(url, {
+    method: "POST",
+    mode: "no-cors", 
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(payload)
+  })
+  .then(() => {
+    console.log("Data successfully sent to Google Sheets.");
+  })
+  .catch((error) => {
+    console.error("Error sending data:", error);
+  });
+}
 </script>
 </body>
 </html>
