@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Room Decoration — Perfectionism Study</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Lora:wght@400;600&family=DM+Sans:wght@300;400;500;600&display=swap');
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#1a1614;--surface:#231f1c;--surface2:#2d2825;--surface3:#38332e;
+  --border:#4a4038;--text:#f0ebe3;--text-muted:#9a8f82;
+  --accent:#d4954a;--accent2:#8fb87a;--accent-dim:rgba(212,149,74,0.15);
+  --danger:#c0392b;--shadow:0 4px 24px rgba(0,0,0,0.4);
+  --shadow-lg:0 12px 48px rgba(0,0,0,0.6);--radius:14px;
+}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:48px}
+#header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.5)}
+#header h1{font-family:'Lora',serif;font-size:1.2rem;color:var(--text);white-space:nowrap}
+#header h1 span{color:var(--accent)}
+#click-display{display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border);border-radius:50px;padding:7px 16px;font-size:.9rem;font-weight:500}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--accent);animation:pulse 1.6s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.8)}}
+#click-count{font-size:1.15rem;font-weight:700;color:var(--accent);min-width:2ch;text-align:center}
+#click-count.low{color:var(--danger)}
+#header-btns{display:flex;gap:8px}
+.btn{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.85rem;font-weight:500;transition:all .18s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:#be7d33;transform:translateY(-1px)}
+.btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--surface3)}
+#main{display:flex;flex-direction:column;align-items:center;width:100%;max-width:980px;padding:20px 14px 0;gap:14px}
+#tutorial{width:100%;background:rgba(212,149,74,.1);border:1px solid rgba(212,149,74,.3);border-radius:var(--radius);padding:11px 16px;font-size:.82rem;color:#d4b78a;display:flex;align-items:flex-start;gap:10px;line-height:1.6}
+#close-tutorial{margin-left:auto;background:none;border:none;cursor:pointer;color:#d4b78a;font-size:1rem;padding:0 4px;opacity:.7}
+#close-tutorial:hover{opacity:1}
+#game-wrap{width:100%;border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
+#room-canvas{display:block;width:100%;cursor:default}
+#gameover-banner{display:none;position:absolute;bottom:0;left:0;right:0;background:rgba(192,57,43,.92);color:#fff;text-align:center;padding:13px;font-weight:600;font-size:.9rem;backdrop-filter:blur(4px);z-index:50}
+#status-bar{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 14px;font-size:.82rem;color:var(--text-muted);min-height:33px;display:flex;align-items:center;gap:8px;transition:all .2s}
+#status-bar.error{background:rgba(192,57,43,.15);border-color:rgba(192,57,43,.4);color:#e07a72}
+#status-bar.info{background:rgba(143,184,122,.1);border-color:rgba(143,184,122,.3);color:#a8d494}
+.piece-controls{position:absolute;display:flex;gap:3px;pointer-events:all;z-index:20;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:3px;box-shadow:var(--shadow-lg)}
+.piece-ctrl-btn{width:28px;height:28px;border-radius:6px;border:none;background:var(--surface2);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:background .15s;color:var(--text)}
+.piece-ctrl-btn:hover{background:var(--surface3)}
+.color-palette{position:absolute;display:flex;gap:5px;padding:7px 9px;background:var(--surface);border:1px solid var(--border);border-radius:9px;box-shadow:var(--shadow-lg);z-index:30}
+.color-swatch{width:22px;height:22px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:transform .15s,border-color .15s}
+.color-swatch:hover{transform:scale(1.25)}
+.color-swatch.active{border-color:var(--text)}
+#inventory{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+#inventory h3{font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--text-muted);margin-bottom:11px;font-weight:500}
+#items-row{display:flex;gap:9px;flex-wrap:wrap}
+.item-btn{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px 8px;background:var(--surface2);border:2px solid transparent;border-radius:10px;cursor:pointer;transition:all .18s;user-select:none;flex:1;min-width:76px;max-width:108px}
+.item-btn:hover{background:var(--surface3);border-color:var(--border)}
+.item-btn.selected{background:var(--accent-dim);border-color:var(--accent);box-shadow:0 0 0 3px rgba(212,149,74,.15)}
+.item-btn .inv-svg{width:54px;height:54px;pointer-events:none}
+.item-btn .label{font-size:.72rem;color:var(--text-muted);font-weight:500;pointer-events:none}
+.item-btn.selected .label{color:var(--accent)}
+#modal-overlay{display:none;position:fixed;inset:0;background:rgba(10,8,6,.7);z-index:200;align-items:center;justify-content:center;padding:20px}
+#modal-overlay.open{display:flex}
+#modal{background:var(--surface);border-radius:18px;padding:28px;max-width:540px;width:100%;box-shadow:var(--shadow-lg);max-height:90vh;overflow-y:auto;border:1px solid var(--border)}
+#modal h2{font-family:'Lora',serif;font-size:1.3rem;margin-bottom:5px;color:var(--text)}
+#modal .subtitle{font-size:.82rem;color:var(--text-muted);margin-bottom:20px}
+.q-item{margin-bottom:14px;padding:13px;background:var(--surface2);border-radius:10px;border:1px solid var(--border)}
+.q-text{font-size:.87rem;font-weight:500;margin-bottom:10px;line-height:1.5;color:var(--text)}
+.q-num{display:inline-block;width:21px;height:21px;border-radius:50%;background:var(--accent);color:#fff;font-size:.72rem;font-weight:600;text-align:center;line-height:21px;margin-right:6px}
+.likert-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.likert-label{font-size:.68rem;color:var(--text-muted);white-space:nowrap;line-height:1.3}
+.likert-options{display:flex;gap:5px;flex:1;justify-content:center}
+.likert-btn{width:33px;height:33px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface3);cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text-muted);transition:all .15s}
+.likert-btn:hover{border-color:var(--accent);color:var(--accent)}
+.likert-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+#results-section{display:none;width:100%;max-width:980px;padding:0 14px}
+#results-section.visible{display:block}
+.results-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin:14px 0;box-shadow:var(--shadow)}
+.results-card h3{font-family:'Lora',serif;font-size:1.1rem;margin-bottom:14px;color:var(--text)}
+table.metrics-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.metrics-table th{text-align:left;padding:8px 12px;background:var(--surface2);color:var(--text-muted);font-weight:500;font-size:.74rem;text-transform:uppercase;letter-spacing:.06em;border-bottom:1px solid var(--border)}
+.metrics-table td{padding:9px 12px;border-bottom:1px solid var(--surface2);color:var(--text)}
+.metrics-table tr:last-child td{border-bottom:none}
+.metric-val{font-weight:700;font-size:.98rem;color:var(--accent);text-align:right}
+.metric-desc{color:var(--text-muted);font-size:.78rem}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <h1>Room <span>Decoration</span></h1>
+  <div id="click-display">
+    <div class="dot"></div>
+    Clicks left: <span id="click-count">30</span>
+  </div>
+  <div id="header-btns">
+    <button class="btn btn-secondary" id="reset-btn">↺ Reset</button>
+    <button class="btn btn-primary" id="finish-btn">Finish &amp; Save</button>
+  </div>
+</div>
+
+<div id="main">
+  <div id="tutorial">
+    <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px">💡</span>
+    <div><b>How to play:</b> Select a furniture piece below, then click inside the room to place it. Each operation (place, move, rotate, resize, change color, delete) costs <b>1 click</b> — you have <b>30 total</b>. Selecting an item from inventory is free.</div>
+    <button id="close-tutorial">✕</button>
+  </div>
+
+  <div id="game-wrap">
+    <canvas id="room-canvas"></canvas>
+    <div id="gameover-banner">⛔ No clicks left — game over. Press "Finish &amp; Save" to continue.</div>
+  </div>
+
+  <div id="status-bar">
+    <span>👆</span>
+    <span id="status-text">Select a furniture piece below, then click in the room to place it.</span>
+  </div>
+
+  <div class="piece-controls" id="piece-controls" style="display:none">
+    <button class="piece-ctrl-btn" id="ctrl-rotate" title="Rotate 45°">↻</button>
+    <button class="piece-ctrl-btn" id="ctrl-grow" title="Larger">＋</button>
+    <button class="piece-ctrl-btn" id="ctrl-shrink" title="Smaller">－</button>
+    <button class="piece-ctrl-btn" id="ctrl-color" title="Color">🎨</button>
+    <button class="piece-ctrl-btn" id="ctrl-delete" title="Delete">🗑</button>
+  </div>
+
+  <div class="color-palette" id="color-palette" style="display:none">
+    <div class="color-swatch" style="background:#d4954a" data-color="#d4954a"></div>
+    <div class="color-swatch" style="background:#4a7fb5" data-color="#4a7fb5"></div>
+    <div class="color-swatch" style="background:#7eb87a" data-color="#7eb87a"></div>
+    <div class="color-swatch" style="background:#b55a6e" data-color="#b55a6e"></div>
+    <div class="color-swatch" style="background:#8c7abf" data-color="#8c7abf"></div>
+    <div class="color-swatch" style="background:#c8b89a" data-color="#c8b89a"></div>
+  </div>
+
+  <div id="inventory">
+    <h3>Furniture Inventory</h3>
+    <div id="items-row"></div>
+  </div>
+</div>
+
+<div id="results-section">
+  <div class="results-card">
+    <h3>📊 Behavioral Metrics</h3>
+    <table class="metrics-table">
+      <thead><tr><th>Metric</th><th>Description</th><th style="text-align:right">Value</th></tr></thead>
+      <tbody id="metrics-tbody"></tbody>
+    </table>
+  </div>
+  <div class="results-card">
+    <h3>📋 Questionnaire Results</h3>
+    <table class="metrics-table">
+      <thead><tr><th>Item</th><th style="text-align:right">Score</th></tr></thead>
+      <tbody id="questionnaire-tbody"></tbody>
+    </table>
+  </div>
+  <button class="btn btn-primary" id="download-btn" style="display:block;width:100%;margin-bottom:24px;padding:13px;font-size:.95rem;border-radius:10px">⬇ Download Full Report (JSON)</button>
+</div>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <h2>Perfectionism Questionnaire</h2>
+    <p class="subtitle">Please answer all 10 questions honestly. There are no right or wrong answers.</p>
+    <div id="questions-container"></div>
+    <div style="margin-top:18px">
+      <button class="btn btn-primary" id="submit-questionnaire" style="width:100%;padding:12px">Submit &amp; See Results</button>
+    </div>
+    <p id="q-error" style="color:var(--danger);font-size:.8rem;margin-top:9px;display:none">Please answer all questions before submitting.</p>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════
+// SVG FURNITURE — clean vector illustrations, no bg
+// Each uses COLOR / COLORDARK / COLORDARK2 placeholders
+// ═══════════════════════════════════════════════════
+const FURNITURE_SVG = {
+
+sofa: `<svg viewBox="0 0 140 90" xmlns="http://www.w3.org/2000/svg">
+  <!-- Back cushions -->
+  <rect x="22" y="18" width="42" height="32" rx="8" fill="COLOR" stroke="rgba(0,0,0,0.18)" stroke-width="1.2"/>
+  <rect x="70" y="18" width="42" height="32" rx="8" fill="COLOR" stroke="rgba(0,0,0,0.18)" stroke-width="1.2"/>
+  <!-- Seat -->
+  <rect x="16" y="46" width="108" height="26" rx="9" fill="COLORDARK" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
+  <!-- Arms -->
+  <rect x="4"  y="30" width="20" height="46" rx="8" fill="COLORDARK" stroke="rgba(0,0,0,0.18)" stroke-width="1"/>
+  <rect x="116" y="30" width="20" height="46" rx="8" fill="COLORDARK" stroke="rgba(0,0,0,0.18)" stroke-width="1"/>
+  <!-- Legs -->
+  <rect x="16" y="70" width="10" height="14" rx="3" fill="COLORDARK2"/>
+  <rect x="114" y="70" width="10" height="14" rx="3" fill="COLORDARK2"/>
+  <!-- Cushion seam lines -->
+  <line x1="43" y1="18" x2="43" y2="50" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+  <line x1="91" y1="18" x2="91" y2="50" stroke="rgba(0,0,0,0.1)" stroke-width="1.5"/>
+  <!-- Highlight -->
+  <rect x="22" y="20" width="42" height="6" rx="3" fill="rgba(255,255,255,0.14)"/>
+  <rect x="70" y="20" width="42" height="6" rx="3" fill="rgba(255,255,255,0.14)"/>
+</svg>`,
+
+chair: `<svg viewBox="0 0 90 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Back rest -->
+  <rect x="12" y="8" width="66" height="42" rx="9" fill="COLORDARK" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
+  <!-- Back cushion -->
+  <rect x="18" y="13" width="54" height="32" rx="6" fill="COLOR" stroke="rgba(0,0,0,0.1)" stroke-width="1"/>
+  <!-- Seat -->
+  <rect x="8" y="46" width="74" height="24" rx="8" fill="COLOR" stroke="rgba(0,0,0,0.2)" stroke-width="1.2"/>
+  <!-- Seat highlight -->
+  <rect x="14" y="48" width="62" height="7" rx="3" fill="rgba(255,255,255,0.14)"/>
+  <!-- Legs -->
+  <rect x="14" y="68" width="10" height="26" rx="4" fill="COLORDARK2"/>
+  <rect x="66" y="68" width="10" height="26" rx="4" fill="COLORDARK2"/>
+  <!-- Cross brace -->
+  <rect x="19" y="82" width="52" height="5" rx="2" fill="COLORDARK2"/>
+  <!-- Back cushion highlight -->
+  <rect x="18" y="13" width="54" height="7" rx="3" fill="rgba(255,255,255,0.12)"/>
+</svg>`,
+
+table: `<svg viewBox="0 0 140 85" xmlns="http://www.w3.org/2000/svg">
+  <!-- Table top surface -->
+  <rect x="5" y="16" width="130" height="16" rx="5" fill="COLOR" stroke="rgba(0,0,0,0.22)" stroke-width="1.4"/>
+  <!-- Edge banding -->
+  <rect x="5" y="12" width="130" height="8" rx="4" fill="COLORDARK" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+  <!-- Surface sheen -->
+  <rect x="10" y="14" width="120" height="5" rx="2.5" fill="rgba(255,255,255,0.2)"/>
+  <!-- Left leg assembly -->
+  <rect x="14" y="32" width="12" height="46" rx="5" fill="COLORDARK2"/>
+  <!-- Right leg assembly -->
+  <rect x="114" y="32" width="12" height="46" rx="5" fill="COLORDARK2"/>
+  <!-- Stretcher rail -->
+  <rect x="26" y="58" width="88" height="6" rx="3" fill="COLORDARK2"/>
+  <!-- Wood grain lines -->
+  <line x1="40" y1="16" x2="40" y2="28" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+  <line x1="70" y1="16" x2="70" y2="28" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+  <line x1="100" y1="16" x2="100" y2="28" stroke="rgba(0,0,0,0.06)" stroke-width="1"/>
+</svg>`,
+
+bookshelf: `<svg viewBox="0 0 90 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Cabinet body -->
+  <rect x="6" y="4" width="78" height="112" rx="5" fill="COLORDARK2" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>
+  <!-- Back panel -->
+  <rect x="10" y="8" width="70" height="104" rx="3" fill="rgba(0,0,0,0.12)"/>
+  <!-- Shelves -->
+  <rect x="6" y="36" width="78" height="6" rx="2" fill="COLORDARK"/>
+  <rect x="6" y="66" width="78" height="6" rx="2" fill="COLORDARK"/>
+  <rect x="6" y="96" width="78" height="6" rx="2" fill="COLORDARK"/>
+  <!-- Top shelf books -->
+  <rect x="12" y="11" width="9"  height="25" rx="2" fill="#e07a72"/>
+  <rect x="23" y="14" width="7"  height="22" rx="2" fill="#7eb87a"/>
+  <rect x="32" y="11" width="11" height="25" rx="2" fill="#4a7fb5"/>
+  <rect x="45" y="13" width="8"  height="23" rx="2" fill="#d4954a"/>
+  <rect x="55" y="11" width="6"  height="25" rx="2" fill="#8c7abf"/>
+  <rect x="63" y="12" width="9"  height="24" rx="2" fill="#c09050"/>
+  <!-- Mid shelf books -->
+  <rect x="12" y="42" width="8"  height="24" rx="2" fill="#4a7fb5"/>
+  <rect x="22" y="44" width="11" height="22" rx="2" fill="#d4954a"/>
+  <rect x="35" y="42" width="7"  height="24" rx="2" fill="#e07a72"/>
+  <rect x="44" y="43" width="9"  height="23" rx="2" fill="#7eb87a"/>
+  <rect x="55" y="42" width="6"  height="24" rx="2" fill="#8c7abf"/>
+  <rect x="63" y="44" width="9"  height="22" rx="2" fill="#b08060"/>
+  <!-- Lower shelf books -->
+  <rect x="12" y="72" width="10" height="24" rx="2" fill="#7eb87a"/>
+  <rect x="24" y="73" width="8"  height="23" rx="2" fill="#e07a72"/>
+  <rect x="34" y="72" width="12" height="24" rx="2" fill="#d4954a"/>
+  <rect x="48" y="73" width="7"  height="23" rx="2" fill="#4a7fb5"/>
+  <rect x="57" y="72" width="9"  height="24" rx="2" fill="#8c7abf"/>
+  <rect x="68" y="73" width="6"  height="23" rx="2" fill="#c0a060"/>
+  <!-- Feet -->
+  <rect x="10" y="114" width="14" height="6" rx="2" fill="COLORDARK"/>
+  <rect x="66" y="114" width="14" height="6" rx="2" fill="COLORDARK"/>
+</svg>`,
+
+vase: `<svg viewBox="0 0 70 100" xmlns="http://www.w3.org/2000/svg">
+  <!-- Shadow -->
+  <ellipse cx="35" cy="96" rx="20" ry="4" fill="rgba(0,0,0,0.2)"/>
+  <!-- Vase body -->
+  <path d="M26 88 Q14 72 16 50 Q18 30 22 20 Q26 10 35 8 Q44 10 48 20 Q52 30 54 50 Q56 72 44 88 Z"
+        fill="COLOR" stroke="rgba(0,0,0,0.22)" stroke-width="1.5"/>
+  <!-- Neck -->
+  <rect x="27" y="6" width="16" height="10" rx="4" fill="COLORDARK"/>
+  <!-- Rim -->
+  <ellipse cx="35" cy="6" rx="9" ry="3.5" fill="COLORDARK"/>
+  <!-- Highlight -->
+  <path d="M21 52 Q27 44 24 34" stroke="rgba(255,255,255,0.3)" stroke-width="3" fill="none" stroke-linecap="round"/>
+  <path d="M20 65 Q26 57 23 48" stroke="rgba(255,255,255,0.15)" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <!-- Decorative stripe -->
+  <path d="M18 58 Q35 54 52 58" stroke="rgba(0,0,0,0.1)" stroke-width="2" fill="none"/>
+  <!-- Flowers -->
+  <line x1="35" y1="7"  x2="22" y2="-7" stroke="#7eb87a" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="35" y1="7"  x2="40" y2="-10" stroke="#7eb87a" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="35" y1="7"  x2="35" y2="-12" stroke="#7eb87a" stroke-width="2.2" stroke-linecap="round"/>
+  <line x1="35" y1="7"  x2="28" y2="-14" stroke="#7eb87a" stroke-width="1.8" stroke-linecap="round"/>
+  <line x1="35" y1="7"  x2="46" y2="-4" stroke="#7eb87a" stroke-width="1.8" stroke-linecap="round"/>
+  <circle cx="22" cy="-8"  r="4.5" fill="#e07a72"/>
+  <circle cx="22" cy="-8"  r="2"   fill="#f0b0a0"/>
+  <circle cx="40" cy="-11" r="4"   fill="#d4954a"/>
+  <circle cx="40" cy="-11" r="1.8" fill="#f0c88a"/>
+  <circle cx="35" cy="-13" r="4.5" fill="#e07a72"/>
+  <circle cx="35" cy="-13" r="2"   fill="#f0b0a0"/>
+  <circle cx="28" cy="-15" r="3.5" fill="#8c7abf"/>
+  <circle cx="46" cy="-5"  r="3.5" fill="#d4954a"/>
+</svg>`,
+
+lamp: `<svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Base shadow -->
+  <ellipse cx="40" cy="116" rx="24" ry="5" fill="rgba(0,0,0,0.22)"/>
+  <!-- Base -->
+  <ellipse cx="40" cy="110" rx="22" ry="6" fill="COLORDARK2"/>
+  <rect x="28" y="78" width="24" height="34" rx="5" fill="COLORDARK2"/>
+  <!-- Pole mid node -->
+  <ellipse cx="40" cy="72" rx="7" ry="4" fill="COLORDARK"/>
+  <!-- Pole -->
+  <rect x="36" y="60" width="8" height="18" rx="3" fill="COLORDARK2"/>
+  <!-- Shade outer -->
+  <path d="M12 60 Q16 18 40 14 Q64 18 68 60 Z"
+        fill="COLOR" stroke="rgba(0,0,0,0.18)" stroke-width="1.4"/>
+  <!-- Shade inner lip -->
+  <ellipse cx="40" cy="60" rx="28" ry="6" fill="COLORDARK"/>
+  <!-- Top cap -->
+  <ellipse cx="40" cy="14" rx="9" ry="3.5" fill="COLORDARK"/>
+  <!-- Shade highlight -->
+  <path d="M18 56 Q22 24 40 20 Q52 24 58 50" stroke="rgba(255,255,255,0.13)" stroke-width="8" fill="none"/>
+  <!-- Glow -->
+  <ellipse cx="40" cy="52" rx="16" ry="8" fill="rgba(255,240,180,0.25)"/>
+  <!-- Finial -->
+  <circle cx="40" cy="12" r="4" fill="COLORDARK2"/>
+</svg>`,
+
+painting: `<svg viewBox="0 0 110 85" xmlns="http://www.w3.org/2000/svg">
+  <!-- Frame shadow -->
+  <rect x="5" y="5" width="100" height="76" rx="5" fill="rgba(0,0,0,0.3)"/>
+  <!-- Outer frame -->
+  <rect x="3" y="3" width="104" height="76" rx="6" fill="COLORDARK2" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>
+  <!-- Frame inner bevel -->
+  <rect x="7" y="7" width="96" height="68" rx="4" fill="COLORDARK" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+  <!-- Canvas area -->
+  <rect x="11" y="11" width="88" height="60" rx="3" fill="#f2eddd"/>
+  <!-- Painting scene - gradient sky -->
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#a8d0f0"/>
+      <stop offset="100%" stop-color="#e8f4fc"/>
+    </linearGradient>
+  </defs>
+  <rect x="11" y="11" width="88" height="35" rx="3" fill="url(#sky)"/>
+  <!-- Ground -->
+  <rect x="11" y="46" width="88" height="25" rx="0" fill="#8db87a"/>
+  <rect x="11" y="60" width="88" height="11" rx="3" fill="#6a9a58"/>
+  <!-- Sun -->
+  <circle cx="75" cy="22" r="8" fill="#f0c830" opacity=".9"/>
+  <circle cx="75" cy="22" r="5" fill="#ffe870" opacity=".95"/>
+  <!-- Cloud -->
+  <circle cx="36" cy="19" r="6"   fill="white" opacity=".8"/>
+  <circle cx="44" cy="17" r="7"   fill="white" opacity=".8"/>
+  <circle cx="52" cy="19" r="5.5" fill="white" opacity=".8"/>
+  <!-- Trees -->
+  <rect x="28" y="40" width="5" height="14" rx="1" fill="#6b4020"/>
+  <polygon points="30.5,20 22,42 39,42" fill="#4a8a38"/>
+  <polygon points="30.5,30 20,46 41,46" fill="#5a9a48"/>
+  <rect x="68" y="44" width="4" height="11" rx="1" fill="#6b4020"/>
+  <polygon points="70,28 63,46 77,46" fill="#4a8a38"/>
+  <polygon points="70,36 62,50 78,50" fill="#5a9a48"/>
+  <!-- Hanger wire -->
+  <line x1="55" y1="3" x2="42" y2="-4" stroke="COLORDARK" stroke-width="1.5"/>
+  <line x1="55" y1="3" x2="68" y2="-4" stroke="COLORDARK" stroke-width="1.5"/>
+  <circle cx="42" cy="-4" r="2.5" fill="COLORDARK2"/>
+  <circle cx="68" cy="-4" r="2.5" fill="COLORDARK2"/>
+  <!-- Frame corner ornaments -->
+  <rect x="3"   y="3"   width="12" height="12" rx="6" fill="COLOR" opacity=".5"/>
+  <rect x="95"  y="3"   width="12" height="12" rx="6" fill="COLOR" opacity=".5"/>
+  <rect x="3"   y="67"  width="12" height="12" rx="6" fill="COLOR" opacity=".5"/>
+  <rect x="95"  y="67"  width="12" height="12" rx="6" fill="COLOR" opacity=".5"/>
+</svg>`,
+
+};
+
+// ═══════════════════════════════════════════
+// COLOR TINTING
+// ═══════════════════════════════════════════
+function tintSVG(svgStr, color) {
+  const r=parseInt(color.slice(1,3),16), g=parseInt(color.slice(3,5),16), b=parseInt(color.slice(5,7),16);
+  const mk=(dr,dg,db)=>`rgb(${Math.max(0,r+dr)},${Math.max(0,g+dg)},${Math.max(0,b+db)})`;
+  return svgStr
+    .replace(/COLORDARK2/g, mk(-70,-60,-50))
+    .replace(/COLORDARK/g,  mk(-38,-32,-25))
+    .replace(/COLOR(?!DARK)/g, color);
+}
+
+function svgToDataURL(s) {
+  return "data:image/svg+xml;charset=utf-8," + encodeURIComponent(s);
+}
+
+// ═══════════════════════════════════════════
+// CONSTANTS
+// ═══════════════════════════════════════════
+const PIECE_COLORS = ["#d4954a","#4a7fb5","#7eb87a","#b55a6e","#8c7abf","#c8b89a"];
+const FURNITURE_DEFS = {
+  sofa:      {label:"Sofa",      w:130, h:72},
+  chair:     {label:"Chair",     w:75,  h:82},
+  table:     {label:"Table",     w:115, h:65},
+  bookshelf: {label:"Bookshelf", w:78,  h:105},
+  vase:      {label:"Vase",      w:50,  h:85},
+  lamp:      {label:"Lamp",      w:62,  h:100},
+  painting:  {label:"Painting",  w:100, h:72},
+};
+const QUESTIONNAIRE=[
+  "If I fail at something, I feel like a worthless person.",
+  "My parents had very high expectations of me.",
+  "I often procrastinate because I'm afraid I won't do a task well.",
+  "Even when I try hard, I often feel that I'm not good enough.",
+  "I must be the best, otherwise I am a failure.",
+  "Before starting a task, I think repeatedly about how to do it correctly.",
+  "People expect me to perform perfectly.",
+  "Small details are very important to me, even if others don't notice them.",
+  "After delivering a task, I keep thinking that I wish I had done something differently.",
+  "I set very high personal standards."
+];
+
+// ═══════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════
+let clicksLeft=30, gameStartTime=performance.now(), gameFinished=false;
+let selectedItemType=null, placedPieces=[], selectedPiece=null, eventLog=[];
+let sessionId="session-"+new Date().toISOString().replace(/[:.]/g,"-");
+let questionnaireAnswers=new Array(10).fill(null);
+let dragging=false, dragOffsetX=0, dragOffsetY=0, dragStartX=0, dragStartY=0, dragMoved=false;
+const imgCache={};
+
+// ═══════════════════════════════════════════
+// CANVAS
+// ═══════════════════════════════════════════
+const canvas=document.getElementById("room-canvas");
+const ctx=canvas.getContext("2d");
+let CW=0, CH=0;
+
+function resizeCanvas(){
+  const wrap=document.getElementById("game-wrap");
+  const dpr=window.devicePixelRatio||1;
+  const cw=wrap.clientWidth, ch=Math.round(cw*0.565);
+  canvas.style.width=cw+"px"; canvas.style.height=ch+"px";
+  canvas.width=cw*dpr; canvas.height=ch*dpr;
+  ctx.scale(dpr,dpr); CW=cw; CH=ch; render();
+}
+window.addEventListener("resize",resizeCanvas);
+
+// ═══════════════════════════════════════════
+// ROOM RENDERER
+// ═══════════════════════════════════════════
+function drawRoom(){
+  // ── Ceiling strip
+  ctx.fillStyle="#18120e"; ctx.fillRect(0,0,CW,CH*0.1);
+
+  // ── Left side wall (perspective trapezoid)
+  ctx.beginPath();
+  ctx.moveTo(0,CH*0.1); ctx.lineTo(CW*0.12,CH*0.1);
+  ctx.lineTo(CW*0.12,CH*0.7); ctx.lineTo(0,CH);
+  ctx.closePath();
+  const lwg=ctx.createLinearGradient(0,0,CW*0.14,0);
+  lwg.addColorStop(0,"#1e1610"); lwg.addColorStop(1,"#3a2e22");
+  ctx.fillStyle=lwg; ctx.fill();
+
+  // ── Right side wall
+  ctx.beginPath();
+  ctx.moveTo(CW,CH*0.1); ctx.lineTo(CW*0.88,CH*0.1);
+  ctx.lineTo(CW*0.88,CH*0.7); ctx.lineTo(CW,CH);
+  ctx.closePath();
+  const rwg=ctx.createLinearGradient(CW,0,CW*0.86,0);
+  rwg.addColorStop(0,"#1e1610"); rwg.addColorStop(1,"#3a2e22");
+  ctx.fillStyle=rwg; ctx.fill();
+
+  // ── Back wall (warm plaster)
+  ctx.beginPath();
+  ctx.moveTo(CW*0.12,CH*0.1); ctx.lineTo(CW*0.88,CH*0.1);
+  ctx.lineTo(CW*0.88,CH*0.7); ctx.lineTo(CW*0.12,CH*0.7);
+  ctx.closePath();
+  const bwg=ctx.createLinearGradient(CW*0.5,CH*0.1,CW*0.5,CH*0.7);
+  bwg.addColorStop(0,"#50402e"); bwg.addColorStop(0.6,"#5c4c38"); bwg.addColorStop(1,"#4a3c2c");
+  ctx.fillStyle=bwg; ctx.fill();
+
+  // ── Wainscoting panels on back wall
+  const panelH=CH*0.18, panelY=CH*0.52;
+  const panelCount=4, panelSpacing=CW*0.74/panelCount;
+  ctx.strokeStyle="rgba(0,0,0,0.2)"; ctx.lineWidth=1.2;
+  for(let i=0;i<panelCount;i++){
+    const px=CW*0.14+i*panelSpacing+panelSpacing*0.08;
+    const pw=panelSpacing*0.84;
+    ctx.strokeRect(px, panelY, pw, panelH);
+    ctx.strokeStyle="rgba(255,255,255,0.04)"; ctx.strokeRect(px+2,panelY+2,pw-4,panelH-4);
+    ctx.strokeStyle="rgba(0,0,0,0.2)";
+  }
+  // Rail line
+  ctx.beginPath(); ctx.moveTo(CW*0.12,panelY-2); ctx.lineTo(CW*0.88,panelY-2);
+  ctx.strokeStyle="rgba(0,0,0,0.25)"; ctx.lineWidth=4; ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(CW*0.12,panelY-2); ctx.lineTo(CW*0.88,panelY-2);
+  ctx.strokeStyle="rgba(255,255,255,0.05)"; ctx.lineWidth=1.5; ctx.stroke();
+
+  // ── Crown molding
+  ctx.fillStyle="#28200e"; ctx.fillRect(CW*0.12,CH*0.1,CW*0.76,7);
+  ctx.fillStyle="#3a2e1a"; ctx.fillRect(CW*0.12,CH*0.1,CW*0.76,3);
+
+  // ── Baseboard
+  ctx.fillStyle="#28200e"; ctx.fillRect(CW*0.12,CH*0.69,CW*0.76,9);
+  ctx.fillStyle="#342818"; ctx.fillRect(CW*0.12,CH*0.69,CW*0.76,3);
+
+  // ── Floor (hardwood with perspective)
+  ctx.beginPath();
+  ctx.moveTo(CW*0.12,CH*0.7); ctx.lineTo(CW*0.88,CH*0.7);
+  ctx.lineTo(CW,CH); ctx.lineTo(0,CH);
+  ctx.closePath();
+  const fg=ctx.createLinearGradient(0,CH*0.7,0,CH);
+  fg.addColorStop(0,"#7a5530"); fg.addColorStop(0.45,"#8a6038"); fg.addColorStop(1,"#5c3d1e");
+  ctx.fillStyle=fg; ctx.fill();
+
+  // Plank lines (perspective)
+  ctx.save();
+  ctx.strokeStyle="rgba(0,0,0,0.18)"; ctx.lineWidth=0.7;
+  const vp={x:CW*0.5,y:CH*0.7};
+  for(let i=-8;i<=8;i++){
+    const bx=CW/2+i*CW*0.075;
+    ctx.beginPath(); ctx.moveTo(vp.x,vp.y); ctx.lineTo(bx,CH); ctx.stroke();
+  }
+  for(let j=1;j<=6;j++){
+    const py=CH*0.7+j*(CH*0.05);
+    const pct=(py-CH*0.7)/(CH*0.3);
+    const xl=CW*0.12-pct*CW*0.12, xr=CW*0.88+pct*CW*0.12;
+    ctx.beginPath(); ctx.moveTo(xl,py); ctx.lineTo(xr,py); ctx.stroke();
+  }
+  ctx.restore();
+  // Floor reflection sheen
+  ctx.save();
+  const ref=ctx.createLinearGradient(0,CH*0.7,0,CH*0.85);
+  ref.addColorStop(0,"rgba(255,200,120,0.07)");
+  ref.addColorStop(1,"transparent");
+  ctx.fillStyle=ref;
+  ctx.beginPath();
+  ctx.moveTo(CW*0.12,CH*0.7); ctx.lineTo(CW*0.88,CH*0.7);
+  ctx.lineTo(CW*0.75,CH*0.85); ctx.lineTo(CW*0.25,CH*0.85);
+  ctx.closePath(); ctx.fill();
+  ctx.restore();
+
+  // ══════════════════════════════════════
+  // WINDOW (left area of back wall)
+  // ══════════════════════════════════════
+  const wx=CW*0.17, wy=CH*0.13, ww=CW*0.2, wh=CH*0.42;
+  // Outer glow halo
+  ctx.save();
+  const halo=ctx.createRadialGradient(wx+ww/2,wy+wh/2,ww*0.1,wx+ww/2,wy+wh/2,ww*1.1);
+  halo.addColorStop(0,"rgba(180,220,255,0.18)");
+  halo.addColorStop(1,"transparent");
+  ctx.fillStyle=halo; ctx.fillRect(wx-30,wy-20,ww+60,wh+50); ctx.restore();
+  // Sky
+  const sky=ctx.createLinearGradient(wx,wy,wx,wy+wh);
+  sky.addColorStop(0,"#5b9fd4"); sky.addColorStop(0.7,"#b8daf2"); sky.addColorStop(1,"#d8eef8");
+  ctx.fillStyle=sky; ctx.fillRect(wx,wy,ww,wh);
+  // Clouds
+  function cloud(cx,cy,s){
+    ctx.save(); ctx.fillStyle="rgba(255,255,255,0.72)";
+    ctx.beginPath(); ctx.arc(cx,cy,s,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx+s*1.1,cy+s*0.2,s*0.75,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx-s*0.75,cy+s*0.3,s*0.6,0,Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+  cloud(wx+ww*0.28,wy+wh*0.2,ww*0.065);
+  cloud(wx+ww*0.7,wy+wh*0.14,ww*0.07);
+  // Window sill/frame
+  ctx.fillStyle="#221810";
+  ctx.fillRect(wx-5,wy-5,ww+10,6);        // top
+  ctx.fillRect(wx-5,wy+wh,ww+10,8);       // bottom (sill)
+  ctx.fillRect(wx-5,wy-5,6,wh+13);        // left
+  ctx.fillRect(wx+ww-1,wy-5,6,wh+13);     // right
+  // Sill ledge depth
+  ctx.fillStyle="#3a2c1c"; ctx.fillRect(wx-7,wy+wh+3,ww+14,8);
+  // Cross bars
+  ctx.fillStyle="#221810";
+  ctx.fillRect(wx+ww/2-2,wy,4,wh);        // vertical
+  ctx.fillRect(wx,wy+wh*0.48,ww,4);       // horizontal
+  // Inner frame light bevel
+  ctx.strokeStyle="rgba(255,255,255,0.1)"; ctx.lineWidth=1;
+  ctx.strokeRect(wx+1,wy+1,ww-2,wh-2);
+  // Light shaft
+  ctx.save();
+  ctx.globalAlpha=0.05;
+  const ls=ctx.createLinearGradient(wx,wy+wh,CW*0.5,CH);
+  ls.addColorStop(0,"#ffe0a0"); ls.addColorStop(1,"transparent");
+  ctx.fillStyle=ls;
+  ctx.beginPath();
+  ctx.moveTo(wx,wy+wh); ctx.lineTo(wx+ww,wy+wh);
+  ctx.lineTo(CW*0.55,CH); ctx.lineTo(CW*0.28,CH);
+  ctx.closePath(); ctx.fill(); ctx.restore();
+  // Curtains
+  function drawCurtain(x, dir){
+    ctx.save();
+    const cw2=ww*0.16;
+    ctx.fillStyle="#7a3a20"; ctx.globalAlpha=0.88;
+    ctx.beginPath();
+    ctx.moveTo(x,wy-16);
+    ctx.quadraticCurveTo(x+dir*cw2*0.6,wy+wh*0.35,x+dir*cw2,wy+wh+16);
+    ctx.lineTo(x+dir*(cw2+18),wy+wh+16);
+    ctx.quadraticCurveTo(x+dir*(cw2*0.6+18),wy+wh*0.35,x+dir*18,wy-16);
+    ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
+  drawCurtain(wx-2,1); drawCurtain(wx+ww+2,-1);
+  // Curtain rod
+  ctx.fillStyle="#b08840";
+  ctx.fillRect(wx-24,wy-18,ww+48,5);
+  ctx.beginPath(); ctx.arc(wx-24,wy-16,5,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(wx+ww+24,wy-16,5,0,Math.PI*2); ctx.fill();
+
+  // ══════════════════════════════════════
+  // FIREPLACE (right side of back wall)
+  // ══════════════════════════════════════
+  const fpx=CW*0.63, fpy=CH*0.2, fpw=CW*0.21, fph=CH*0.48;
+  // Mantel surround
+  ctx.fillStyle="#221810";
+  ctx.fillRect(fpx-10,fpy-16,fpw+20,fph+16);
+  // Firebox arch
+  ctx.fillStyle="#120c06";
+  const archR=fpw*0.42;
+  const archCX=fpx+fpw/2, archCY=fpy+fpw*0.46;
+  ctx.beginPath();
+  ctx.arc(archCX,archCY,archR,Math.PI,0);
+  ctx.lineTo(fpx+fpw,fpy+fph-6);
+  ctx.lineTo(fpx,fpy+fph-6);
+  ctx.closePath(); ctx.fill();
+  // Marble/stone texture on surround
+  ctx.save();
+  ctx.strokeStyle="rgba(80,60,40,0.3)"; ctx.lineWidth=1;
+  for(let k=0;k<4;k++){
+    ctx.beginPath();
+    ctx.moveTo(fpx-8,fpy+k*(fph/4));
+    ctx.quadraticCurveTo(fpx+fpw/2,fpy+k*(fph/4)+10,fpx+fpw+8,fpy+k*(fph/4));
+    ctx.stroke();
+  }
+  ctx.restore();
+  // Grate bars
+  ctx.strokeStyle="rgba(60,40,20,0.8)"; ctx.lineWidth=2.5;
+  for(let b=0;b<5;b++){
+    const bx=fpx+fpw*0.15+b*fpw*0.15;
+    ctx.beginPath(); ctx.moveTo(bx,fpy+fph*0.55); ctx.lineTo(bx,fpy+fph-8); ctx.stroke();
+  }
+  ctx.beginPath(); ctx.moveTo(fpx+fpw*0.12,fpy+fph*0.72); ctx.lineTo(fpx+fpw*0.88,fpy+fph*0.72); ctx.stroke();
+  // Fire glow radial
+  const fg2=ctx.createRadialGradient(archCX,fpy+fph*0.78,0,archCX,fpy+fph*0.78,fpw*0.52);
+  fg2.addColorStop(0,"rgba(255,200,60,0.75)");
+  fg2.addColorStop(0.45,"rgba(255,90,10,0.4)");
+  fg2.addColorStop(1,"transparent");
+  ctx.fillStyle=fg2;
+  ctx.beginPath();
+  ctx.arc(archCX,archCY,archR,Math.PI,0);
+  ctx.lineTo(fpx+fpw,fpy+fph-6); ctx.lineTo(fpx,fpy+fph-6); ctx.closePath();
+  ctx.fill();
+  // Flames
+  function flame(bx,by,sw,col,op){
+    ctx.save(); ctx.globalAlpha=op; ctx.fillStyle=col;
+    ctx.beginPath(); ctx.moveTo(bx,by);
+    ctx.quadraticCurveTo(bx-sw*0.6,by-sw*0.9,bx,by-sw*1.5);
+    ctx.quadraticCurveTo(bx+sw*0.6,by-sw*0.9,bx,by);
+    ctx.fill(); ctx.restore();
+  }
+  flame(fpx+fpw*0.32,fpy+fph*0.82,fpw*0.13,"#ffea30",0.9);
+  flame(fpx+fpw*0.5, fpy+fph*0.82,fpw*0.17,"#ffb010",0.88);
+  flame(fpx+fpw*0.68,fpy+fph*0.82,fpw*0.12,"#ffda40",0.85);
+  flame(fpx+fpw*0.44,fpy+fph*0.82,fpw*0.09,"#ffffff",0.7);
+  // Mantel shelf
+  ctx.fillStyle="#1c1208"; ctx.fillRect(fpx-14,fpy-16,fpw+28,13);
+  ctx.fillStyle="#2e2010"; ctx.fillRect(fpx-16,fpy-24,fpw+32,12);
+  ctx.fillStyle="#382810"; ctx.fillRect(fpx-16,fpy-24,fpw+32,4);
+  // Mantel items — small clock silhouette
+  const clkX=fpx+fpw/2, clkY=fpy-28;
+  ctx.fillStyle="#604828"; ctx.fillRect(clkX-8,clkY-18,16,20); // clock body
+  ctx.strokeStyle="#a08040"; ctx.lineWidth=1.5;
+  ctx.beginPath(); ctx.arc(clkX,clkY-10,5,0,Math.PI*2); ctx.stroke();
+  // Wall ambient from fire
+  ctx.save();
+  const amb=ctx.createRadialGradient(fpx+fpw/2,fpy+fph*0.5,0,fpx+fpw/2,fpy+fph*0.5,CW*0.45);
+  amb.addColorStop(0,"rgba(255,130,20,0.1)");
+  amb.addColorStop(1,"transparent");
+  ctx.fillStyle=amb; ctx.fillRect(CW*0.12,CH*0.1,CW*0.76,CH*0.6);
+  ctx.restore();
+
+  // ══════════════════════════════════════
+  // OVERHEAD CHANDELIER
+  // ══════════════════════════════════════
+  const chX=CW*0.5, chY=CH*0.1;
+  // Chain
+  ctx.strokeStyle="#6a5030"; ctx.lineWidth=2;
+  ctx.beginPath(); ctx.moveTo(chX,chY); ctx.lineTo(chX,chY+CH*0.1); ctx.stroke();
+  // Body ring
+  ctx.save(); ctx.strokeStyle="#c0a050"; ctx.lineWidth=3;
+  ctx.beginPath(); ctx.ellipse(chX,chY+CH*0.1,CW*0.05,CH*0.012,0,0,Math.PI*2); ctx.stroke();
+  // Arms
+  const armCount=4;
+  for(let a=0;a<armCount;a++){
+    const angle=-Math.PI/2+(a/armCount)*Math.PI*2;
+    const ax=chX+Math.cos(angle)*CW*0.045;
+    const ay=chY+CH*0.1+Math.sin(angle)*CH*0.01;
+    ctx.strokeStyle="#b09040"; ctx.lineWidth=2;
+    ctx.beginPath(); ctx.moveTo(chX,chY+CH*0.1); ctx.lineTo(ax,ay); ctx.stroke();
+    // Candle + flame
+    ctx.fillStyle="#e8e0c8"; ctx.fillRect(ax-3,ay-CH*0.04,6,CH*0.04);
+    ctx.fillStyle="rgba(255,220,80,0.9)";
+    ctx.beginPath(); ctx.ellipse(ax,ay-CH*0.045,4,6,0,0,Math.PI*2); ctx.fill();
+  }
+  ctx.restore();
+  // Chandelier glow
+  ctx.save();
+  const cg=ctx.createRadialGradient(chX,chY+CH*0.12,0,chX,chY+CH*0.12,CW*0.22);
+  cg.addColorStop(0,"rgba(255,240,180,0.16)");
+  cg.addColorStop(1,"transparent");
+  ctx.fillStyle=cg; ctx.fillRect(0,0,CW,CH*0.5);
+  ctx.restore();
+
+  // Empty hint
+  if(placedPieces.length===0){
+    ctx.save();
+    ctx.fillStyle="rgba(255,210,140,0.2)";
+    ctx.font=`${CH*0.036}px 'DM Sans',sans-serif`;
+    ctx.textAlign="center";
+    ctx.fillText("Select furniture below and click to place",CW/2,CH*0.84);
+    ctx.restore();
+  }
+}
+
+// ═══════════════════════════════════════════
+// PIECE IMAGE CACHE & DRAWING
+// ═══════════════════════════════════════════
+function getPieceImg(type,color){
+  const k=type+"_"+color;
+  if(imgCache[k]) return imgCache[k];
+  const img=new Image();
+  img.src=svgToDataURL(tintSVG(FURNITURE_SVG[type],color));
+  imgCache[k]=img;
+  img.onload=()=>render();
+  return img;
+}
+
+function drawPiece(p){
+  ctx.save();
+  ctx.translate(p.x,p.y);
+  ctx.rotate(p.angle*Math.PI/180);
+  const hw=p.w/2, hh=p.h/2;
+  ctx.shadowColor="rgba(0,0,0,0.5)";
+  ctx.shadowBlur=16; ctx.shadowOffsetY=7;
+  const img=getPieceImg(p.type,p.color);
+  if(img&&img.complete&&img.naturalWidth>0){
+    ctx.drawImage(img,-hw,-hh,p.w,p.h);
+  } else {
+    ctx.fillStyle=p.color;
+    ctx.beginPath(); ctx.roundRect(-hw,-hh,p.w,p.h,6); ctx.fill();
+  }
+  ctx.shadowColor="transparent";
+  if(p===selectedPiece){
+    ctx.strokeStyle="#d4954a"; ctx.lineWidth=2.5; ctx.setLineDash([6,3]);
+    ctx.beginPath(); ctx.roundRect(-hw-5,-hh-5,p.w+10,p.h+10,8); ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
+function render(){
+  ctx.clearRect(0,0,CW,CH);
+  drawRoom();
+  placedPieces.forEach(p=>drawPiece(p));
+}
+
+// ═══════════════════════════════════════════
+// BUILD INVENTORY
+// ═══════════════════════════════════════════
+function buildInventory(){
+  const row=document.getElementById("items-row");
+  row.innerHTML="";
+  Object.keys(FURNITURE_DEFS).forEach(type=>{
+    const def=FURNITURE_DEFS[type];
+    const btn=document.createElement("button");
+    btn.className="item-btn"; btn.dataset.item=type;
+    const svgEl=document.createElement("div");
+    svgEl.className="inv-svg";
+    svgEl.innerHTML=tintSVG(FURNITURE_SVG[type],PIECE_COLORS[0]);
+    svgEl.querySelector("svg").style.cssText="width:54px;height:54px";
+    btn.appendChild(svgEl);
+    const lbl=document.createElement("span"); lbl.className="label"; lbl.textContent=def.label;
+    btn.appendChild(lbl);
+    row.appendChild(btn);
+  });
+  document.querySelectorAll(".item-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      if(gameFinished) return;
+      const type=btn.dataset.item;
+      if(selectedItemType===type){
+        selectedItemType=null; btn.classList.remove("selected"); setStatus("Deselected.");
+      } else {
+        selectedItemType=type;
+        document.querySelectorAll(".item-btn").forEach(b=>b.classList.remove("selected"));
+        btn.classList.add("selected");
+        setStatus(`${FURNITURE_DEFS[type].label} selected — click in the room to place it.`,"info");
+      }
+      selectedPiece=null; hideControls(); render();
+    });
+  });
+}
+
+// ═══════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════
+function ts(){return(performance.now()-gameStartTime)/1000;}
+function logEvent(type,piece,extra={}){
+  eventLog.push({type,item:piece?piece.type:null,timestamp:parseFloat(ts().toFixed(3)),...extra});
+}
+function decrementClick(){
+  if(clicksLeft<=0) return false;
+  clicksLeft--;
+  const el=document.getElementById("click-count");
+  el.textContent=clicksLeft; el.classList.toggle("low",clicksLeft<=8);
+  if(clicksLeft===0){
+    document.getElementById("gameover-banner").style.display="block";
+    setStatus("⛔ No clicks left — game over!","error");
+  }
+  return true;
+}
+function setStatus(msg,type=""){
+  const bar=document.getElementById("status-bar");
+  bar.classList.remove("error","info");
+  if(type) bar.classList.add(type);
+  document.getElementById("status-text").textContent=msg;
+}
+function getCanvasPos(e){
+  const r=canvas.getBoundingClientRect();
+  return{x:e.clientX-r.left,y:e.clientY-r.top};
+}
+function hitTest(px,py){
+  for(let i=placedPieces.length-1;i>=0;i--){
+    const p=placedPieces[i];
+    const cos=Math.cos(-p.angle*Math.PI/180), sin=Math.sin(-p.angle*Math.PI/180);
+    const lx=cos*(px-p.x)-sin*(py-p.y), ly=sin*(px-p.x)+cos*(py-p.y);
+    if(Math.abs(lx)<=p.w/2&&Math.abs(ly)<=p.h/2) return p;
+  }
+  return null;
+}
+function makePiece(type,x,y){
+  const d=FURNITURE_DEFS[type];
+  return{id:Date.now()+Math.random(),type,x,y,w:d.w,h:d.h,angle:0,color:PIECE_COLORS[0],placedAt:ts()};
+}
+function hideControls(){
+  document.getElementById("piece-controls").style.display="none";
+  document.getElementById("color-palette").style.display="none";
+}
+function showControls(p){
+  const wrap=document.getElementById("game-wrap");
+  const wr=wrap.getBoundingClientRect(), cr=canvas.getBoundingClientRect();
+  const sx=(p.x/CW)*cr.width+cr.left-wr.left;
+  const sy=(p.y/CH)*cr.height+cr.top-wr.top;
+  const sh=(p.h/CH)*cr.height;
+  const ctrl=document.getElementById("piece-controls");
+  ctrl.style.display="flex";
+  ctrl.style.left=(sx-70)+"px";
+  ctrl.style.top=(sy-sh/2-44)+"px";
+  document.getElementById("color-palette").style.display="none";
+}
+
+// ═══════════════════════════════════════════
+// CANVAS EVENTS
+// ═══════════════════════════════════════════
+canvas.addEventListener("pointerdown",e=>{
+  if(gameFinished) return;
+  e.preventDefault(); canvas.setPointerCapture(e.pointerId);
+  const pos=getCanvasPos(e), hit=hitTest(pos.x,pos.y);
+  if(selectedItemType&&!hit){
+    if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+    const piece=makePiece(selectedItemType,pos.x,pos.y);
+    placedPieces.push(piece);
+    logEvent("place",piece,{x:+pos.x.toFixed(1),y:+pos.y.toFixed(1)});
+    selectedPiece=piece;
+    document.querySelectorAll(".item-btn").forEach(b=>b.classList.remove("selected"));
+    selectedItemType=null;
+    showControls(piece); setStatus(`Placed ${FURNITURE_DEFS[piece.type].label}. Drag to move.`); render(); return;
+  }
+  if(hit){
+    selectedPiece=hit; dragging=true; dragMoved=false;
+    dragOffsetX=pos.x-hit.x; dragOffsetY=pos.y-hit.y;
+    dragStartX=hit.x; dragStartY=hit.y;
+    showControls(hit); render(); return;
+  }
+  selectedPiece=null; hideControls(); render();
+});
+canvas.addEventListener("pointermove",e=>{
+  if(!dragging||!selectedPiece) return;
+  e.preventDefault();
+  const pos=getCanvasPos(e);
+  const nx=pos.x-dragOffsetX, ny=pos.y-dragOffsetY;
+  if(Math.abs(nx-dragStartX)>3||Math.abs(ny-dragStartY)>3) dragMoved=true;
+  selectedPiece.x=nx; selectedPiece.y=ny;
+  showControls(selectedPiece); render();
+});
+canvas.addEventListener("pointerup",e=>{
+  if(!dragging) return; dragging=false;
+  if(dragMoved&&selectedPiece){
+    if(clicksLeft<=0){
+      selectedPiece.x=dragStartX; selectedPiece.y=dragStartY;
+      setStatus("⛔ No clicks left!","error"); render(); return;
+    }
+    decrementClick();
+    logEvent("move",selectedPiece,{x:+selectedPiece.x.toFixed(1),y:+selectedPiece.y.toFixed(1)});
+    showControls(selectedPiece); setStatus(`Moved ${FURNITURE_DEFS[selectedPiece.type].label}.`);
+  }
+});
+canvas.addEventListener("pointercancel",()=>{dragging=false;});
+
+// ═══════════════════════════════════════════
+// CONTROLS
+// ═══════════════════════════════════════════
+document.getElementById("ctrl-rotate").addEventListener("click",()=>{
+  if(!selectedPiece||gameFinished) return;
+  if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+  selectedPiece.angle=(selectedPiece.angle+45)%360;
+  logEvent("rotate",selectedPiece,{angle:selectedPiece.angle});
+  showControls(selectedPiece); render(); setStatus(`Rotated to ${selectedPiece.angle}°.`);
+});
+document.getElementById("ctrl-grow").addEventListener("click",()=>{
+  if(!selectedPiece||gameFinished) return;
+  if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+  selectedPiece.w=Math.min(selectedPiece.w*1.22,CW*0.5);
+  selectedPiece.h=Math.min(selectedPiece.h*1.22,CH*0.5);
+  logEvent("resize",selectedPiece,{width:+selectedPiece.w.toFixed(1),height:+selectedPiece.h.toFixed(1)});
+  showControls(selectedPiece); render();
+});
+document.getElementById("ctrl-shrink").addEventListener("click",()=>{
+  if(!selectedPiece||gameFinished) return;
+  if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+  selectedPiece.w=Math.max(selectedPiece.w/1.22,24);
+  selectedPiece.h=Math.max(selectedPiece.h/1.22,24);
+  logEvent("resize",selectedPiece,{width:+selectedPiece.w.toFixed(1),height:+selectedPiece.h.toFixed(1)});
+  showControls(selectedPiece); render();
+});
+document.getElementById("ctrl-color").addEventListener("click",e=>{
+  if(!selectedPiece||gameFinished) return;
+  const ctrl=document.getElementById("piece-controls");
+  const pal=document.getElementById("color-palette");
+  const cr=ctrl.getBoundingClientRect(), wr=document.getElementById("game-wrap").getBoundingClientRect();
+  pal.style.display=pal.style.display==="flex"?"none":"flex";
+  pal.style.left=(cr.left-wr.left)+"px";
+  pal.style.top=(cr.bottom-wr.top+4)+"px";
+  document.querySelectorAll(".color-swatch").forEach(s=>s.classList.toggle("active",s.dataset.color===selectedPiece.color));
+  e.stopPropagation();
+});
+document.querySelectorAll(".color-swatch").forEach(sw=>{
+  sw.addEventListener("click",()=>{
+    if(!selectedPiece||gameFinished) return;
+    if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+    delete imgCache[selectedPiece.type+"_"+selectedPiece.color];
+    selectedPiece.color=sw.dataset.color;
+    logEvent("change_color",selectedPiece,{color:sw.dataset.color});
+    document.getElementById("color-palette").style.display="none";
+    render(); setStatus("Color changed.");
+  });
+});
+document.getElementById("ctrl-delete").addEventListener("click",()=>{
+  if(!selectedPiece||gameFinished) return;
+  if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+  logEvent("delete",selectedPiece);
+  const name=FURNITURE_DEFS[selectedPiece.type].label;
+  placedPieces=placedPieces.filter(p=>p!==selectedPiece);
+  selectedPiece=null; hideControls(); render(); setStatus(`Deleted ${name}.`);
+});
+document.addEventListener("click",e=>{
+  if(!e.target.closest("#color-palette")&&!e.target.closest("#ctrl-color"))
+    document.getElementById("color-palette").style.display="none";
+});
+
+// ═══════════════════════════════════════════
+// FINISH & RESET
+// ═══════════════════════════════════════════
+document.getElementById("finish-btn").addEventListener("click",()=>{
+  if(gameFinished) return;
+  gameFinished=true; hideControls(); openQuestionnaire();
+});
+document.getElementById("reset-btn").addEventListener("click",()=>{
+  if(!confirm("Reset the game? All progress will be lost.")) return;
+  clicksLeft=30; gameStartTime=performance.now(); gameFinished=false;
+  selectedItemType=null; placedPieces=[]; selectedPiece=null; eventLog=[];
+  sessionId="session-"+new Date().toISOString().replace(/[:.]/g,"-");
+  questionnaireAnswers=new Array(10).fill(null);
+  document.getElementById("click-count").textContent="30";
+  document.getElementById("click-count").classList.remove("low");
+  document.getElementById("gameover-banner").style.display="none";
+  document.getElementById("results-section").classList.remove("visible");
+  document.querySelectorAll(".item-btn").forEach(b=>b.classList.remove("selected"));
+  setStatus("Game reset. Select furniture to begin."); render();
+});
+
+// ═══════════════════════════════════════════
+// QUESTIONNAIRE
+// ═══════════════════════════════════════════
+function openQuestionnaire(){
+  const c=document.getElementById("questions-container"); c.innerHTML="";
+  QUESTIONNAIRE.forEach((q,i)=>{
+    const d=document.createElement("div"); d.className="q-item";
+    d.innerHTML=`<div class="q-text"><span class="q-num">${i+1}</span>${q}</div>
+    <div class="likert-row">
+      <span class="likert-label">Strongly<br>Disagree</span>
+      <div class="likert-options" id="q-opts-${i}">
+        ${[1,2,3,4,5].map(v=>`<button class="likert-btn" data-q="${i}" data-v="${v}">${v}</button>`).join("")}
+      </div>
+      <span class="likert-label">Strongly<br>Agree</span>
+    </div>`;
+    c.appendChild(d);
+  });
+  c.querySelectorAll(".likert-btn").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      const qi=+btn.dataset.q, v=+btn.dataset.v;
+      questionnaireAnswers[qi]=v;
+      document.querySelectorAll(`#q-opts-${qi} .likert-btn`).forEach(b=>b.classList.toggle("selected",+b.dataset.v===v));
+    });
+  });
+  document.getElementById("modal-overlay").classList.add("open");
+}
+document.getElementById("submit-questionnaire").addEventListener("click",()=>{
+  if(questionnaireAnswers.some(a=>a===null)){document.getElementById("q-error").style.display="block";return;}
+  document.getElementById("q-error").style.display="none";
+  document.getElementById("modal-overlay").classList.remove("open");
+  showResults();
+});
+
+// ═══════════════════════════════════════════
+// METRICS
+// ═══════════════════════════════════════════
+function buildTimeline(){
+  let c=0; const active={};
+  return eventLog.map(e=>{
+    let pid;
+    if(e.type==="place"){pid="p"+(c++);if(!active[e.item])active[e.item]=[];active[e.item].push(pid);}
+    else if(e.type==="delete"){const a=active[e.item]||[];pid=a.pop()||null;}
+    else{const a=active[e.item]||[];pid=a.length?a[a.length-1]:null;}
+    return{...e,pieceId:pid};
+  });
+}
+function calcReattemptRate(){
+  const d=eventLog.filter(e=>e.type==="delete").length;
+  return placedPieces.length===0?0:+(d/placedPieces.length).toFixed(2);
+}
+function calcReinspectionTime(){
+  const tl=buildTimeline(); const byId={};
+  tl.forEach(e=>{if(e.pieceId){if(!byId[e.pieceId])byId[e.pieceId]=[];byId[e.pieceId].push(e.timestamp);}});
+  const gaps=[];
+  Object.values(byId).forEach(ts=>{for(let i=1;i<ts.length;i++){const g=ts[i]-ts[i-1];if(g>0.5)gaps.push(g);}});
+  return gaps.length===0?0:+(gaps.reduce((a,b)=>a+b,0)/gaps.length).toFixed(2);
+}
+function calcDeliberationRatio(){
+  const tl=buildTimeline(); const byId={};
+  tl.forEach(e=>{
+    if(!e.pieceId) return;
+    if(!byId[e.pieceId])byId[e.pieceId]={place:null,firstAfter:null,lastMove:null};
+    const r=byId[e.pieceId];
+    if(e.type==="place")r.place=e.timestamp;
+    else if(r.firstAfter===null)r.firstAfter=e.timestamp;
+    if(e.type==="move")r.lastMove=e.timestamp;
+  });
+  const ratios=[];
+  Object.values(byId).forEach(r=>{
+    if(r.place===null)return;
+    const f=r.firstAfter!==null?r.firstAfter:r.place;
+    const l=r.lastMove!==null?r.lastMove:r.place;
+    ratios.push(l===0||l===r.place?1:f/l);
+  });
+  return ratios.length===0?1:+(ratios.reduce((a,b)=>a+b,0)/ratios.length).toFixed(2);
+}
+function calcPerfectionismScore(){
+  if(!eventLog.length)return 0;
+  const maxT=eventLog[eventLog.length-1].timestamp;
+  const late=eventLog.filter(e=>e.timestamp>=maxT*0.7);
+  const s=late.reduce((a,e)=>a+(e.type==="change_color"?2:e.type==="move"?1:0),0);
+  return placedPieces.length===0?0:+(s/placedPieces.length).toFixed(2);
+}
+function calcFirstActionLatency(){return eventLog.length===0?0:+eventLog[0].timestamp.toFixed(2);}
+function calcAutoPilotRate(){
+  const m=eventLog.filter(e=>e.type==="move").length;
+  return placedPieces.length===0?0:+(m/placedPieces.length).toFixed(2);
+}
+
+// ═══════════════════════════════════════════
+// SHOW RESULTS
+// ═══════════════════════════════════════════
+function showResults(){
+  const metrics={
+    reattempt_rate:       calcReattemptRate(),
+    reinspection_time:    calcReinspectionTime(),
+    deliberation_ratio:   calcDeliberationRatio(),
+    perfectionism_score:  calcPerfectionismScore(),
+    first_action_latency: calcFirstActionLatency(),
+    auto_pilot_rate:      calcAutoPilotRate(),
+  };
+  const meta=[
+    {k:"reattempt_rate",      l:"Reattempt Rate",          d:"Deletes ÷ final pieces"},
+    {k:"reinspection_time",   l:"Reinspection Time (s)",   d:"Avg gap >0.5s between ops on same piece"},
+    {k:"deliberation_ratio",  l:"Deliberation Ratio",      d:"First click time ÷ last move time"},
+    {k:"perfectionism_score", l:"Perfectionism Score",     d:"Weighted late-stage edits ÷ final pieces"},
+    {k:"first_action_latency",l:"First Action Latency (s)",d:"Time to first event"},
+    {k:"auto_pilot_rate",     l:"Auto-Pilot Rate",         d:"Move ops ÷ final pieces"},
+  ];
+  document.getElementById("metrics-tbody").innerHTML=meta.map(m=>
+    `<tr><td><b>${m.l}</b></td><td class="metric-desc">${m.d}</td><td class="metric-val">${metrics[m.k]}</td></tr>`
+  ).join("");
+  const qtotal=questionnaireAnswers.reduce((a,b)=>a+b,0);
+  document.getElementById("questionnaire-tbody").innerHTML=
+    questionnaireAnswers.map((v,i)=>`<tr><td>Q${i+1}: ${QUESTIONNAIRE[i].substring(0,55)}…</td><td class="metric-val">${v}</td></tr>`).join("")+
+    `<tr><td><b>Total Score (10–50)</b></td><td class="metric-val" style="font-size:1.2rem">${qtotal}</td></tr>`;
+  document.getElementById("results-section").classList.add("visible");
+  setTimeout(()=>document.getElementById("results-section").scrollIntoView({behavior:"smooth"}),100);
+  window._report={
+    session_id:sessionId,
+    timestamp:new Date().toISOString(),
+    event_log:eventLog,
+    behavioral_metrics:metrics,
+    questionnaire_scores:{total:qtotal,items:questionnaireAnswers}
+  };
+  console.log("=== FULL REPORT ===",JSON.stringify(window._report,null,2));
+}
+document.getElementById("download-btn").addEventListener("click",()=>{
+  if(!window._report) return;
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([JSON.stringify(window._report,null,2)],{type:"application/json"}));
+  a.download=`perfectionism-${sessionId}.json`; a.click();
+});
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+document.getElementById("close-tutorial").addEventListener("click",()=>document.getElementById("tutorial").style.display="none");
+buildInventory();
+resizeCanvas();
+</script>
+</body>
+</html>
