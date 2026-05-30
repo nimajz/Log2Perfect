@@ -69,6 +69,22 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .likert-btn{width:33px;height:33px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface3);cursor:pointer;font-size:.82rem;font-weight:600;color:var(--text-muted);transition:all .15s}
 .likert-btn:hover{border-color:var(--accent);color:var(--accent)}
 .likert-btn.selected{background:var(--accent);border-color:var(--accent);color:#fff}
+#intro-overlay{position:fixed;inset:0;background:var(--bg);z-index:300;display:flex;align-items:center;justify-content:center;padding:20px}
+#intro-box{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:32px 28px;max-width:560px;width:100%;box-shadow:var(--shadow-lg);max-height:92vh;overflow-y:auto}
+#intro-box h2{font-family:'Lora',serif;font-size:1.35rem;color:var(--text);margin-bottom:16px;text-align:center}
+#intro-msg{font-size:.9rem;line-height:1.9;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:22px;direction:rtl;text-align:right}
+#intro-form{display:flex;flex-direction:column;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group label{font-size:.83rem;color:var(--text-muted);font-weight:500;direction:rtl;text-align:right}
+.gender-row{display:flex;gap:10px;justify-content:center}
+.gender-btn{flex:1;padding:10px 8px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.88rem;font-weight:500;transition:all .18s}
+.gender-btn:hover{border-color:var(--accent);background:var(--accent-dim)}
+.gender-btn.selected{background:var(--accent-dim);border-color:var(--accent);color:var(--accent)}
+#age-input{padding:10px 14px;border-radius:9px;border:1.5px solid var(--border);background:var(--surface2);color:var(--text);font-family:'DM Sans',sans-serif;font-size:.9rem;width:100%;outline:none;direction:rtl;text-align:right}
+#age-input:focus{border-color:var(--accent)}
+#intro-error{color:var(--danger);font-size:.8rem;display:none;text-align:center;direction:rtl}
+#start-game-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .18s;margin-top:4px}
+#start-game-btn:hover{background:#be7d33;transform:translateY(-1px)}
 #results-section{display:none;width:100%;max-width:980px;padding:0 14px}
 #results-section.visible{display:block}
 .results-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin:14px 0;box-shadow:var(--shadow)}
@@ -82,6 +98,35 @@ table.metrics-table{width:100%;border-collapse:collapse;font-size:.85rem}
 </style>
 </head>
 <body>
+
+<div id="intro-overlay">
+  <div id="intro-box">
+    <h2>🏠 خوش آمدید</h2>
+    <div id="intro-msg">
+      کاربر عزیز سلام<br><br>
+      ابتدا یک بازی چینش اجسام در خانه برای شما اجرا می‌شود. شما حداکثر ۳۰ حرکت می‌توانید انجام دهید. لاگ بازی شما ثبت می‌شود، بنابراین با دقت و با توجه به تعداد حرکات باقی‌مانده انجام دهید.<br><br>
+      ضمناً شما می‌توانید هر جای بازی آن را با دکمه <b>Finish &amp; Save</b> به پایان برسانید و لزومی بر استفاده از تمام حرکات نیست. مشخص است هرچه خروجی شما تمیزتر باشد امتیاز بیشتری می‌گیرید.<br><br>
+      بعد از بازی، به ۱۰ سوال روان‌شناسانه پاسخ می‌دهید. لطفاً پاسخ‌ها واقعی و متناسب با شخصیت شما باشد.<br><br>
+      <b>لطفاً فقط یک‌بار در بازی شرکت کنید. ممنون.</b>
+    </div>
+    <div id="intro-form">
+      <div class="form-group">
+        <label>جنسیت خود را انتخاب کنید:</label>
+        <div class="gender-row">
+          <button class="gender-btn" data-gender="مرد">مرد</button>
+          <button class="gender-btn" data-gender="زن">زن</button>
+          <button class="gender-btn" data-gender="ترجیح می‌دهم نگویم">ترجیح می‌دهم نگویم</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>سن خود را وارد کنید:</label>
+        <input type="number" id="age-input" placeholder="مثلاً ۲۵" min="10" max="99">
+      </div>
+      <p id="intro-error">لطفاً جنسیت و سن خود را وارد کنید.</p>
+      <button id="start-game-btn">شروع بازی ←</button>
+    </div>
+  </div>
+</div>
 
 <div id="header">
   <h1>Room <span>Decoration</span></h1>
@@ -155,13 +200,13 @@ table.metrics-table{width:100%;border-collapse:collapse;font-size:.85rem}
 
 <div id="modal-overlay">
   <div id="modal">
-    <h2>Perfectionism Questionnaire</h2>
-    <p class="subtitle">Please answer all 10 questions honestly. There are no right or wrong answers.</p>
+    <h2>پرسشنامه روان‌شناختی</h2>
+    <p class="subtitle">لطفاً به همه ۱۰ سوال صادقانه پاسخ دهید. پاسخ درست یا غلطی وجود ندارد.</p>
     <div id="questions-container"></div>
     <div style="margin-top:18px">
-      <button class="btn btn-primary" id="submit-questionnaire" style="width:100%;padding:12px">Submit &amp; See Results</button>
+      <button class="btn btn-primary" id="submit-questionnaire" style="width:100%;padding:12px">ثبت و مشاهده نتایج</button>
     </div>
-    <p id="q-error" style="color:var(--danger);font-size:.8rem;margin-top:9px;display:none">Please answer all questions before submitting.</p>
+    <p id="q-error" style="color:var(--danger);font-size:.8rem;margin-top:9px;display:none">لطفاً قبل از ثبت به همه سوال‌ها پاسخ دهید.</p>
   </div>
 </div>
 
@@ -398,16 +443,16 @@ const FURNITURE_DEFS = {
   painting:  {label:"Painting",  w:100, h:72},
 };
 const QUESTIONNAIRE=[
-  "If I fail at something, I feel like a worthless person.",
-  "My parents had very high expectations of me.",
-  "I often procrastinate because I'm afraid I won't do a task well.",
-  "Even when I try hard, I often feel that I'm not good enough.",
-  "I must be the best, otherwise I am a failure.",
-  "Before starting a task, I think repeatedly about how to do it correctly.",
-  "People expect me to perform perfectly.",
-  "Small details are very important to me, even if others don't notice them.",
-  "After delivering a task, I keep thinking that I wish I had done something differently.",
-  "I set very high personal standards."
+  "اگر در کاری شکست بخورم، احساس می‌کنم آدم بی‌ارزشی هستم.",
+  "والدینم انتظارات بسیار بالایی از من داشتند.",
+  "اغلب به خاطر ترس از اینکه کاری را خوب انجام ندهم، آن را به تعویق می‌اندازم.",
+  "حتی وقتی تلاش می‌کنم، اغلب احساس می‌کنم به‌اندازه کافی خوب نیستم.",
+  "باید بهترین باشم، وگرنه شکست خورده‌ام.",
+  "قبل از شروع یک کار، بارها فکر می‌کنم که چطور آن را درست انجام دهم.",
+  "مردم انتظار دارند من بی‌نقص عمل کنم.",
+  "جزئیات کوچک برایم بسیار مهم هستند، حتی اگر دیگران متوجه نشوند.",
+  "بعد از تحویل دادن یک کار، دائماً فکر می‌کنم که کاش چیزی را متفاوت انجام می‌دادم.",
+  "برای خودم معیارهای بسیار بالایی تعیین می‌کنم."
 ];
 
 // ═══════════════════════════════════════════
@@ -833,7 +878,9 @@ function hitTest(px,py){
 }
 function makePiece(type,x,y){
   const d=FURNITURE_DEFS[type];
-  return{id:Date.now()+Math.random(),type,x,y,w:d.w,h:d.h,angle:0,color:PIECE_COLORS[0],placedAt:ts()};
+  const isMobile=window.innerWidth<=600;
+  const scale=isMobile?0.62:1;
+  return{id:Date.now()+Math.random(),type,x,y,w:d.w*scale,h:d.h*scale,angle:0,color:PIECE_COLORS[0],placedAt:ts()};
 }
 function hideControls(){
   document.getElementById("piece-controls").style.display="none";
@@ -991,11 +1038,11 @@ function openQuestionnaire(){
     const d=document.createElement("div"); d.className="q-item";
     d.innerHTML=`<div class="q-text"><span class="q-num">${i+1}</span>${q}</div>
     <div class="likert-row">
-      <span class="likert-label">Strongly<br>Disagree</span>
+      <span class="likert-label">کاملاً<br>مخالفم</span>
       <div class="likert-options" id="q-opts-${i}">
         ${[1,2,3,4,5].map(v=>`<button class="likert-btn" data-q="${i}" data-v="${v}">${v}</button>`).join("")}
       </div>
-      <span class="likert-label">Strongly<br>Agree</span>
+      <span class="likert-label">کاملاً<br>موافقم</span>
     </div>`;
     c.appendChild(d);
   });
@@ -1103,6 +1150,8 @@ function showResults(){
   window._report={
     session_id:sessionId,
     timestamp:new Date().toISOString(),
+    gender: window._userGender || "",
+    age: window._userAge || "",
     event_log:eventLog,
     behavioral_metrics:metrics,
     questionnaire_scores:{total:qtotal,items:questionnaireAnswers}
@@ -1120,6 +1169,24 @@ document.getElementById("download-btn").addEventListener("click",()=>{
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
+let _selectedGender = null;
+document.querySelectorAll(".gender-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    _selectedGender = btn.dataset.gender;
+    document.querySelectorAll(".gender-btn").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+  });
+});
+document.getElementById("start-game-btn").addEventListener("click", () => {
+  const age = document.getElementById("age-input").value.trim();
+  if (!_selectedGender || !age || isNaN(age) || +age < 10 || +age > 99) {
+    document.getElementById("intro-error").style.display = "block";
+    return;
+  }
+  window._userGender = _selectedGender;
+  window._userAge = +age;
+  document.getElementById("intro-overlay").style.display = "none";
+});
 document.getElementById("close-tutorial").addEventListener("click",()=>document.getElementById("tutorial").style.display="none");
 buildInventory();
 resizeCanvas();
@@ -1131,13 +1198,15 @@ function sendGameResults(reportData) {
   // آماده‌سازی داده‌ها همراه با دو متغیر جدید به عنوان ورودی‌های گوگل شیت
   const payload = {
     session_id: reportData.session_id || "",
-    Reinspection_Time: metrics.reinspection_time || 0,
-    Deliberation_Ratio: metrics.deliberation_ratio || 0,
-    obsessive_Score: metrics.perfectionism_score || 0,
-    First_Action_Latency: metrics.first_action_latency || 0,
-    Auto_Pilot_Rate: metrics.auto_pilot_rate || 0,
-    Reattempt_Rate: metrics.reattempt_rate || 0,         // استخراج و ارسال نرخ تلاش مجدد
-    Questionnaire_Total: questionnaire.total || 0        // استخراج و ارسال امتیاز کل پرسشنامه
+    Reinspection_Time: metrics.reinspection_time ?? 0,
+    Deliberation_Ratio: metrics.deliberation_ratio ?? 0,
+    obsessive_Score: metrics.perfectionism_score ?? 0,
+    First_Action_Latency: metrics.first_action_latency ?? 0,
+    Auto_Pilot_Rate: metrics.auto_pilot_rate ?? 0,
+    Reattempt_Rate: metrics.reattempt_rate ?? 0,
+    Questionnaire_Total: questionnaire.total ?? 0,
+    Gender: reportData.gender || "",
+    Age: reportData.age || ""
   };
 
   fetch(url, {
