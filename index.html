@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" style="overflow-x:hidden">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -14,7 +14,7 @@
   --danger:#c0392b;--shadow:0 4px 24px rgba(0,0,0,0.4);
   --shadow-lg:0 12px 48px rgba(0,0,0,0.6);--radius:14px;
 }
-body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:48px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:48px;overflow-x:hidden}
 #header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.5)}
 #header h1{font-family:'Lora',serif;font-size:1.2rem;color:var(--text);white-space:nowrap}
 #header h1 span{color:var(--accent)}
@@ -29,12 +29,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 .btn-primary:hover{background:#be7d33;transform:translateY(-1px)}
 .btn-secondary{background:var(--surface2);color:var(--text);border:1px solid var(--border)}
 .btn-secondary:hover{background:var(--surface3)}
-#main{display:flex;flex-direction:column;align-items:center;width:100%;max-width:980px;padding:20px 14px 0;gap:14px}
+#main{display:flex;flex-direction:column;align-items:center;width:100%;max-width:980px;padding:20px 14px 0;gap:14px;overflow-x:hidden}
 #tutorial{width:100%;background:rgba(212,149,74,.1);border:1px solid rgba(212,149,74,.3);border-radius:var(--radius);padding:11px 16px;font-size:.82rem;color:#d4b78a;display:flex;align-items:flex-start;gap:10px;line-height:1.6}
 #close-tutorial{margin-left:auto;background:none;border:none;cursor:pointer;color:#d4b78a;font-size:1rem;padding:0 4px;opacity:.7}
 #close-tutorial:hover{opacity:1}
-#game-wrap{width:100%;border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:var(--shadow-lg);border:1px solid var(--border)}
-#room-canvas{display:block;width:100%;cursor:default}
+#game-wrap{width:100%;border-radius:var(--radius);overflow:hidden;position:relative;box-shadow:var(--shadow-lg);border:1px solid var(--border);touch-action:none}
+#room-canvas{display:block;width:100%;cursor:default;touch-action:none;-webkit-user-select:none;user-select:none}
 #gameover-banner{display:none;position:absolute;bottom:0;left:0;right:0;background:rgba(192,57,43,.92);color:#fff;text-align:center;padding:13px;font-weight:600;font-size:.9rem;backdrop-filter:blur(4px);z-index:50}
 #status-bar{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:8px 14px;font-size:.82rem;color:var(--text-muted);min-height:33px;display:flex;align-items:center;gap:8px;transition:all .2s}
 #status-bar.error{background:rgba(192,57,43,.15);border-color:rgba(192,57,43,.4);color:#e07a72}
@@ -863,10 +863,6 @@ function setStatus(msg,type=""){
   if(type) bar.classList.add(type);
   document.getElementById("status-text").textContent=msg;
 }
-function getCanvasPos(e){
-  const r=canvas.getBoundingClientRect();
-  return{x:e.clientX-r.left,y:e.clientY-r.top};
-}
 function hitTest(px,py){
   for(let i=placedPieces.length-1;i>=0;i--){
     const p=placedPieces[i];
@@ -900,52 +896,121 @@ function showControls(p){
 }
 
 // ═══════════════════════════════════════════
-// CANVAS EVENTS
+// CANVAS EVENTS — touch + pointer robust
 // ═══════════════════════════════════════════
-canvas.addEventListener("pointerdown",e=>{
-  if(gameFinished) return;
-  e.preventDefault(); canvas.setPointerCapture(e.pointerId);
-  const pos=getCanvasPos(e), hit=hitTest(pos.x,pos.y);
+function getCanvasPos(clientX, clientY){
+  const r=canvas.getBoundingClientRect();
+  const scaleX=CW/r.width, scaleY=CH/r.height;
+  return{x:(clientX-r.left)*scaleX, y:(clientY-r.top)*scaleY};
+}
+
+let _activePointerId=null;
+
+function onDragStart(clientX, clientY){
+  if(gameFinished) return false;
+  const pos=getCanvasPos(clientX,clientY);
+  const hit=hitTest(pos.x,pos.y);
   if(selectedItemType&&!hit){
-    if(!decrementClick()){setStatus("⛔ No clicks left!","error");return;}
+    if(!decrementClick()){setStatus("⛔ حرکتی باقی نمانده!","error");return false;}
     const piece=makePiece(selectedItemType,pos.x,pos.y);
     placedPieces.push(piece);
     logEvent("place",piece,{x:+pos.x.toFixed(1),y:+pos.y.toFixed(1)});
     selectedPiece=piece;
     document.querySelectorAll(".item-btn").forEach(b=>b.classList.remove("selected"));
     selectedItemType=null;
-    showControls(piece); setStatus(`Placed ${FURNITURE_DEFS[piece.type].label}. Drag to move.`); render(); return;
+    showControls(piece); setStatus(`${FURNITURE_DEFS[piece.type].label} قرار داده شد.`); render();
+    return false;
   }
   if(hit){
     selectedPiece=hit; dragging=true; dragMoved=false;
-    dragOffsetX=pos.x-hit.x; dragOffsetY=pos.y-hit.y;
+    const pos2=getCanvasPos(clientX,clientY);
+    dragOffsetX=pos2.x-hit.x; dragOffsetY=pos2.y-hit.y;
     dragStartX=hit.x; dragStartY=hit.y;
-    showControls(hit); render(); return;
+    showControls(hit); render();
+    return true;
   }
   selectedPiece=null; hideControls(); render();
-});
-canvas.addEventListener("pointermove",e=>{
+  return false;
+}
+
+function onDragMove(clientX, clientY){
   if(!dragging||!selectedPiece) return;
-  e.preventDefault();
-  const pos=getCanvasPos(e);
+  const pos=getCanvasPos(clientX,clientY);
   const nx=pos.x-dragOffsetX, ny=pos.y-dragOffsetY;
-  if(Math.abs(nx-dragStartX)>3||Math.abs(ny-dragStartY)>3) dragMoved=true;
+  if(Math.abs(nx-dragStartX)>2||Math.abs(ny-dragStartY)>2) dragMoved=true;
   selectedPiece.x=nx; selectedPiece.y=ny;
   showControls(selectedPiece); render();
-});
-canvas.addEventListener("pointerup",e=>{
-  if(!dragging) return; dragging=false;
+}
+
+function onDragEnd(){
+  if(!dragging) return;
+  dragging=false;
   if(dragMoved&&selectedPiece){
     if(clicksLeft<=0){
       selectedPiece.x=dragStartX; selectedPiece.y=dragStartY;
-      setStatus("⛔ No clicks left!","error"); render(); return;
+      setStatus("⛔ حرکتی باقی نمانده!","error"); render(); return;
     }
     decrementClick();
     logEvent("move",selectedPiece,{x:+selectedPiece.x.toFixed(1),y:+selectedPiece.y.toFixed(1)});
-    showControls(selectedPiece); setStatus(`Moved ${FURNITURE_DEFS[selectedPiece.type].label}.`);
+    showControls(selectedPiece); setStatus(`${FURNITURE_DEFS[selectedPiece.type].label} جا به جا شد.`);
   }
+}
+
+// Pointer events (desktop + mobile fallback)
+canvas.addEventListener("pointerdown",e=>{
+  if(e.pointerType==="touch") return; // handled by touch events below
+  e.preventDefault();
+  canvas.setPointerCapture(e.pointerId);
+  onDragStart(e.clientX,e.clientY);
+},{passive:false});
+
+canvas.addEventListener("pointermove",e=>{
+  if(e.pointerType==="touch") return;
+  if(dragging) e.preventDefault();
+  onDragMove(e.clientX,e.clientY);
+},{passive:false});
+
+canvas.addEventListener("pointerup",e=>{
+  if(e.pointerType==="touch") return;
+  onDragEnd();
 });
-canvas.addEventListener("pointercancel",()=>{dragging=false;});
+
+canvas.addEventListener("pointercancel",e=>{
+  if(e.pointerType==="touch") return;
+  dragging=false;
+});
+
+// Touch events — fully manual to prevent scroll hijack
+canvas.addEventListener("touchstart",e=>{
+  if(e.touches.length!==1) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const t=e.touches[0];
+  _activePointerId=t.identifier;
+  onDragStart(t.clientX,t.clientY);
+},{passive:false,capture:true});
+
+canvas.addEventListener("touchmove",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  if(e.touches.length!==1) return;
+  const t=e.touches[0];
+  if(t.identifier!==_activePointerId) return;
+  onDragMove(t.clientX,t.clientY);
+},{passive:false,capture:true});
+
+canvas.addEventListener("touchend",e=>{
+  e.preventDefault();
+  e.stopPropagation();
+  _activePointerId=null;
+  onDragEnd();
+},{passive:false,capture:true});
+
+canvas.addEventListener("touchcancel",e=>{
+  e.preventDefault();
+  _activePointerId=null;
+  dragging=false;
+},{passive:false});
 
 // ═══════════════════════════════════════════
 // CONTROLS
@@ -1191,7 +1256,7 @@ document.getElementById("close-tutorial").addEventListener("click",()=>document.
 buildInventory();
 resizeCanvas();
 function sendGameResults(reportData) {
-  const url = "https://script.google.com/macros/s/AKfycbzRhfqMHAsEFtGoyo5D-kWm4qDpKM4U3AWq-lURZ7e5lhzBueS_Lr3qdB3gfCFAESSP/exec"
+  const url = "https://script.google.com/macros/s/AKfycbwVwEa-1R2BJtxihyP07jsj8smCzNAVnV-kTBN2i32zQMCJLsHCi4II364HtcC_0LWn/exec"
   const metrics = reportData.behavioral_metrics || {};
   const questionnaire = reportData.questionnaire_scores || {};
 
