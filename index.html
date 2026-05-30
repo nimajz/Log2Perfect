@@ -15,6 +15,7 @@
   --shadow-lg:0 12px 48px rgba(0,0,0,0.6);--radius:14px;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;align-items:center;padding-bottom:48px;overflow-x:hidden}
+@media(max-width:600px){body{padding-bottom:80px}}
 #header{width:100%;background:var(--surface);border-bottom:1px solid var(--border);padding:12px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:100;box-shadow:0 2px 20px rgba(0,0,0,0.5)}
 #header h1{font-family:'Lora',serif;font-size:1.2rem;color:var(--text);white-space:nowrap}
 #header h1 span{color:var(--accent)}
@@ -86,6 +87,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 #start-game-btn{background:var(--accent);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'DM Sans',sans-serif;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .18s;margin-top:4px}
 #start-game-btn:hover{background:#be7d33;transform:translateY(-1px)}
 #results-section{display:none;width:100%;max-width:980px;padding:0 14px}
+@media(max-width:600px){
+  #mobile-save-bar{display:flex!important;}
+  #header-btns .btn-primary{display:none}
+}
+#mobile-save-bar{display:none;position:fixed;bottom:0;left:0;right:0;z-index:150;background:var(--surface);border-top:1px solid var(--border);padding:10px 14px;gap:8px;box-shadow:0 -4px 20px rgba(0,0,0,0.4)}
+#mobile-save-bar .btn{flex:1;padding:12px;font-size:.9rem;border-radius:10px;text-align:center}
 #results-section.visible{display:block}
 .results-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;margin:14px 0;box-shadow:var(--shadow)}
 .results-card h3{font-family:'Lora',serif;font-size:1.1rem;margin-bottom:14px;color:var(--text)}
@@ -103,11 +110,13 @@ table.metrics-table{width:100%;border-collapse:collapse;font-size:.85rem}
   <div id="intro-box">
     <h2>🏠 خوش آمدید</h2>
     <div id="intro-msg">
-      کاربر عزیز سلام<br><br>
-      ابتدا یک بازی چینش اجسام در خانه برای شما اجرا می‌شود. شما حداکثر ۳۰ حرکت می‌توانید انجام دهید. لاگ بازی شما ثبت می‌شود، بنابراین با دقت و با توجه به تعداد حرکات باقی‌مانده انجام دهید.<br><br>
-      ضمناً شما می‌توانید هر جای بازی آن را با دکمه <b>Finish &amp; Save</b> به پایان برسانید و لزومی بر استفاده از تمام حرکات نیست. مشخص است هرچه خروجی شما تمیزتر باشد امتیاز بیشتری می‌گیرید.<br><br>
-      بعد از بازی، به ۱۰ سوال روان‌شناسانه پاسخ می‌دهید. لطفاً پاسخ‌ها واقعی و متناسب با شخصیت شما باشد.<br><br>
-      <b>لطفاً فقط یک‌بار در بازی شرکت کنید. ممنون.</b>
+      به چالش چیدمان اتاق <b>PerfLog</b> خوش اومدید.<br><br>
+      هدف شما چیدمان ۹ قطعه مبلمان در یک محیط مجازی است. شما تنها <b>۳۰ کلیک</b> در اختیار دارید؛ این محدودیت، آزمایش دقت، برنامه‌ریزی و سلیقه شماست.<br><br>
+      <b>چند نکته برای عملکرد بهتر:</b><br>
+      • هر جابجایی، چرخش یا تغییر رنگ، یک کلیک محسوب می‌شود.<br>
+      • برای ثبت «طرح نهایی و بی‌نقص»، هر زمان که از هماهنگی چیدمان رضایت داشتید، گزینه <b>Finish &amp; Save</b> را انتخاب کنید.<br>
+      • سیستم، تمامی مراحل تصمیم‌گیری شما را برای تحلیل الگوهای رفتاری ثبت می‌کند؛ پس با تکیه بر استراتژی خود، بهترین خروجی ممکن را خلق کنید.<br><br>
+      پس از پایان چیدمان، ۱۰ پرسش کوتاه برای تکمیل پروفایل رفتاری شما در نظر گرفته شده است. لطفاً با دقت و صداقت پاسخ دهید.
     </div>
     <div id="intro-form">
       <div class="form-group">
@@ -115,7 +124,6 @@ table.metrics-table{width:100%;border-collapse:collapse;font-size:.85rem}
         <div class="gender-row">
           <button class="gender-btn" data-gender="مرد">مرد</button>
           <button class="gender-btn" data-gender="زن">زن</button>
-          <button class="gender-btn" data-gender="ترجیح می‌دهم نگویم">ترجیح می‌دهم نگویم</button>
         </div>
       </div>
       <div class="form-group">
@@ -140,7 +148,11 @@ table.metrics-table{width:100%;border-collapse:collapse;font-size:.85rem}
   </div>
 </div>
 
-<div id="main">
+<div id="mobile-save-bar">
+  <button class="btn btn-secondary" id="mobile-reset-btn">↺ Reset</button>
+  <button class="btn btn-primary" id="mobile-finish-btn">Finish &amp; Save</button>
+</div>
+
   <div id="tutorial">
     <span style="font-size:1.1rem;flex-shrink:0;margin-top:1px">💡</span>
     <div><b>How to play:</b> Select a furniture piece below, then click inside the room to place it. Each operation (place, move, rotate, resize, change color, delete) costs <b>1 click</b> — you have <b>30 total</b>. Selecting an item from inventory is free.</div>
@@ -411,6 +423,60 @@ painting: `<svg viewBox="0 0 110 85" xmlns="http://www.w3.org/2000/svg">
   <rect x="95"  y="67"  width="12" height="12" rx="6" fill="COLOR" opacity=".5"/>
 </svg>`,
 
+coffeetable: `<svg viewBox="0 0 130 70" xmlns="http://www.w3.org/2000/svg">
+  <!-- Table top shadow -->
+  <ellipse cx="65" cy="56" rx="58" ry="8" fill="rgba(0,0,0,0.18)"/>
+  <!-- Table top surface -->
+  <rect x="6" y="18" width="118" height="22" rx="10" fill="COLOR" stroke="rgba(0,0,0,0.2)" stroke-width="1.4"/>
+  <!-- Surface sheen -->
+  <rect x="12" y="20" width="106" height="7" rx="4" fill="rgba(255,255,255,0.18)"/>
+  <!-- Edge banding -->
+  <rect x="6" y="14" width="118" height="8" rx="5" fill="COLORDARK" stroke="rgba(0,0,0,0.12)" stroke-width="1"/>
+  <!-- Four legs -->
+  <rect x="20"  y="40" width="10" height="24" rx="4" fill="COLORDARK2"/>
+  <rect x="100" y="40" width="10" height="24" rx="4" fill="COLORDARK2"/>
+  <rect x="36"  y="40" width="8"  height="20" rx="3" fill="COLORDARK2"/>
+  <rect x="86"  y="40" width="8"  height="20" rx="3" fill="COLORDARK2"/>
+  <!-- Lower shelf -->
+  <rect x="24" y="56" width="82" height="6" rx="3" fill="COLORDARK"/>
+  <!-- Decorative items on top: cup + book -->
+  <rect x="50" y="8" width="18" height="10" rx="2" fill="rgba(255,255,255,0.12)"/>
+  <rect x="72" y="6" width="14" height="12" rx="2" fill="rgba(255,255,255,0.08)"/>
+  <!-- Cup handle -->
+  <path d="M68 10 Q73 10 73 14 Q73 18 68 18" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" fill="none"/>
+</svg>`,
+
+mirror: `<svg viewBox="0 0 80 120" xmlns="http://www.w3.org/2000/svg">
+  <!-- Wall hook -->
+  <rect x="36" y="2" width="8" height="10" rx="3" fill="COLORDARK2"/>
+  <!-- Outer frame -->
+  <rect x="4" y="10" width="72" height="96" rx="12" fill="COLORDARK2" stroke="rgba(0,0,0,0.3)" stroke-width="1.5"/>
+  <!-- Frame inner bevel -->
+  <rect x="8" y="14" width="64" height="88" rx="9" fill="COLORDARK" stroke="rgba(0,0,0,0.15)" stroke-width="1"/>
+  <!-- Mirror glass -->
+  <rect x="12" y="18" width="56" height="80" rx="7" fill="#b8d4e8"/>
+  <!-- Glass gradient overlay -->
+  <defs>
+    <linearGradient id="mirrorGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+      <stop offset="50%" stop-color="rgba(255,255,255,0.05)"/>
+      <stop offset="100%" stop-color="rgba(180,210,240,0.2)"/>
+    </linearGradient>
+  </defs>
+  <rect x="12" y="18" width="56" height="80" rx="7" fill="url(#mirrorGrad)"/>
+  <!-- Reflection highlight streaks -->
+  <line x1="20" y1="22" x2="36" y2="90" stroke="rgba(255,255,255,0.22)" stroke-width="5" stroke-linecap="round"/>
+  <line x1="32" y1="20" x2="44" y2="60" stroke="rgba(255,255,255,0.12)" stroke-width="3" stroke-linecap="round"/>
+  <!-- Frame corner details -->
+  <circle cx="14" cy="20"  r="4" fill="COLOR" opacity=".7"/>
+  <circle cx="66" cy="20"  r="4" fill="COLOR" opacity=".7"/>
+  <circle cx="14" cy="96"  r="4" fill="COLOR" opacity=".7"/>
+  <circle cx="66" cy="96"  r="4" fill="COLOR" opacity=".7"/>
+  <!-- Frame side ornaments -->
+  <rect x="5"  y="48" width="6" height="20" rx="3" fill="COLOR" opacity=".5"/>
+  <rect x="69" y="48" width="6" height="20" rx="3" fill="COLOR" opacity=".5"/>
+</svg>`,
+
 };
 
 // ═══════════════════════════════════════════
@@ -434,13 +500,15 @@ function svgToDataURL(s) {
 // ═══════════════════════════════════════════
 const PIECE_COLORS = ["#d4954a","#4a7fb5","#7eb87a","#b55a6e","#8c7abf","#c8b89a"];
 const FURNITURE_DEFS = {
-  sofa:      {label:"Sofa",      w:130, h:72},
-  chair:     {label:"Chair",     w:75,  h:82},
-  table:     {label:"Table",     w:115, h:65},
-  bookshelf: {label:"Bookshelf", w:78,  h:105},
-  vase:      {label:"Vase",      w:50,  h:85},
-  lamp:      {label:"Lamp",      w:62,  h:100},
-  painting:  {label:"Painting",  w:100, h:72},
+  sofa:        {label:"Sofa",         w:130, h:72},
+  chair:       {label:"Chair",        w:75,  h:82},
+  table:       {label:"Table",        w:115, h:65},
+  bookshelf:   {label:"Bookshelf",    w:78,  h:105},
+  vase:        {label:"Vase",         w:50,  h:85},
+  lamp:        {label:"Lamp",         w:62,  h:100},
+  painting:    {label:"Painting",     w:100, h:72},
+  coffeetable: {label:"Coffee Table", w:110, h:58},
+  mirror:      {label:"Mirror",       w:68,  h:105},
 };
 const QUESTIONNAIRE=[
   "اگر در کاری شکست بخورم، احساس می‌کنم آدم بی‌ارزشی هستم.",
@@ -875,7 +943,7 @@ function hitTest(px,py){
 function makePiece(type,x,y){
   const d=FURNITURE_DEFS[type];
   const isMobile=window.innerWidth<=600;
-  const scale=isMobile?0.62:1;
+  const scale=isMobile?0.50:1;
   return{id:Date.now()+Math.random(),type,x,y,w:d.w*scale,h:d.h*scale,angle:0,color:PIECE_COLORS[0],placedAt:ts()};
 }
 function hideControls(){
@@ -885,13 +953,25 @@ function hideControls(){
 function showControls(p){
   const wrap=document.getElementById("game-wrap");
   const wr=wrap.getBoundingClientRect(), cr=canvas.getBoundingClientRect();
-  const sx=(p.x/CW)*cr.width+cr.left-wr.left;
-  const sy=(p.y/CH)*cr.height+cr.top-wr.top;
-  const sh=(p.h/CH)*cr.height;
+  // Scale factors: canvas logical coords -> screen pixels
+  const scaleX=cr.width/CW, scaleY=cr.height/CH;
+  // Piece center in wrap-relative pixels
+  const sx=(p.x*scaleX)+(cr.left-wr.left);
+  const sy=(p.y*scaleY)+(cr.top-wr.top);
+  // Piece half-height in screen pixels
+  const sh=(p.h*scaleY)/2;
+  const sw=(p.w*scaleX)/2;
   const ctrl=document.getElementById("piece-controls");
   ctrl.style.display="flex";
-  ctrl.style.left=(sx-70)+"px";
-  ctrl.style.top=(sy-sh/2-44)+"px";
+  const ctrlW=160;
+  let left=sx-ctrlW/2;
+  let top=sy-sh-42; // 42px above piece top edge
+  // Clamp horizontally
+  left=Math.max(4, Math.min(left, wr.width-ctrlW-4));
+  // If too close to top, show below instead
+  if(top<4) top=sy+sh+6;
+  ctrl.style.left=left+"px";
+  ctrl.style.top=top+"px";
   document.getElementById("color-palette").style.display="none";
 }
 
@@ -1044,8 +1124,13 @@ document.getElementById("ctrl-color").addEventListener("click",e=>{
   const pal=document.getElementById("color-palette");
   const cr=ctrl.getBoundingClientRect(), wr=document.getElementById("game-wrap").getBoundingClientRect();
   pal.style.display=pal.style.display==="flex"?"none":"flex";
-  pal.style.left=(cr.left-wr.left)+"px";
-  pal.style.top=(cr.bottom-wr.top+4)+"px";
+  // Position palette below the controls bar, clamped within wrap
+  let palLeft=cr.left-wr.left;
+  let palTop=cr.bottom-wr.top+4;
+  const palW=200;
+  palLeft=Math.max(4, Math.min(palLeft, wr.width-palW-4));
+  pal.style.left=palLeft+"px";
+  pal.style.top=palTop+"px";
   document.querySelectorAll(".color-swatch").forEach(s=>s.classList.toggle("active",s.dataset.color===selectedPiece.color));
   e.stopPropagation();
 });
@@ -1080,7 +1165,11 @@ document.getElementById("finish-btn").addEventListener("click",()=>{
   if(gameFinished) return;
   gameFinished=true; hideControls(); openQuestionnaire();
 });
-document.getElementById("reset-btn").addEventListener("click",()=>{
+document.getElementById("mobile-finish-btn").addEventListener("click",()=>{
+  if(gameFinished) return;
+  gameFinished=true; hideControls(); openQuestionnaire();
+});
+function doReset(){
   if(!confirm("Reset the game? All progress will be lost.")) return;
   clicksLeft=30; gameStartTime=performance.now(); gameFinished=false;
   selectedItemType=null; placedPieces=[]; selectedPiece=null; eventLog=[];
@@ -1092,7 +1181,9 @@ document.getElementById("reset-btn").addEventListener("click",()=>{
   document.getElementById("results-section").classList.remove("visible");
   document.querySelectorAll(".item-btn").forEach(b=>b.classList.remove("selected"));
   setStatus("Game reset. Select furniture to begin."); render();
-});
+}
+document.getElementById("reset-btn").addEventListener("click", doReset);
+document.getElementById("mobile-reset-btn").addEventListener("click", doReset);
 
 // ═══════════════════════════════════════════
 // QUESTIONNAIRE
@@ -1256,7 +1347,7 @@ document.getElementById("close-tutorial").addEventListener("click",()=>document.
 buildInventory();
 resizeCanvas();
 function sendGameResults(reportData) {
-  const url = "https://script.google.com/macros/s/AKfycbxplh71IC9QzeFChfXi-KmeB_YAEhzSL9M4r1BA-XMw8D_FOJkdpuQ8bTxpyNhJQkPS/exec"
+  const url = "https://script.google.com/macros/s/AKfycbwVwEa-1R2BJtxihyP07jsj8smCzNAVnV-kTBN2i32zQMCJLsHCi4II364HtcC_0LWn/exec"
   const metrics = reportData.behavioral_metrics || {};
   const questionnaire = reportData.questionnaire_scores || {};
 
