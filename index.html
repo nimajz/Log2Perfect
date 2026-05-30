@@ -1362,7 +1362,8 @@ function sendGameResults(reportData) {
     Reattempt_Rate: metrics.reattempt_rate ?? 0,
     Questionnaire_Total: questionnaire.total ?? 0,
     Gender: reportData.gender || "",
-    Age: reportData.age || ""
+    Age: reportData.age || "",
+    Date: new Date().toLocaleString()
   };
 
   fetch(url, {
