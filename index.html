@@ -1365,6 +1365,7 @@ function sendGameResults(reportData) {
     Auto_Pilot_Rate: metrics.auto_pilot_rate ?? 0,
     Reattempt_Rate: metrics.reattempt_rate ?? 0,
     Questionnaire_Total: questionnaire.total ?? 0,
+    Date : new Date().toLocaleString(),
     Gender: reportData.gender || "",
     Age: reportData.age || ""
   };
